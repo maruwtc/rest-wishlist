@@ -16,9 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   type CreateRestaurantInput,
   type RestaurantItem,
-  type RestaurantSource,
 } from "@/lib/restaurant-store";
-import { cn, formatRelativeDate } from "@/lib/utils";
+import { parseSharedText, sourceLabel } from "@/lib/share-link";
+import { formatRelativeDate } from "@/lib/utils";
 
 type Draft = {
   shareText: string;
@@ -36,89 +36,6 @@ const initialDraft: Draft = {
   notes: "",
 };
 
-function detectSource(url?: string): RestaurantSource {
-  if (!url) {
-    return "manual";
-  }
-
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-
-    if (host.includes("google.") || host.includes("maps.app.goo.gl")) {
-      return "google-maps";
-    }
-
-    if (host.includes("openrice")) {
-      return "openrice";
-    }
-  } catch {
-    return "manual";
-  }
-
-  return "manual";
-}
-
-function sourceLabel(source: RestaurantSource) {
-  switch (source) {
-    case "google-maps":
-      return "Google Maps";
-    case "openrice":
-      return "OpenRice";
-    default:
-      return "Manual";
-  }
-}
-
-function findFirstUrl(value: string) {
-  return value.match(/https?:\/\/\S+/i)?.[0];
-}
-
-function inferNameFromUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    const queryCandidate =
-      parsed.searchParams.get("q") ??
-      parsed.searchParams.get("query") ??
-      parsed.searchParams.get("name");
-
-    if (queryCandidate) {
-      return queryCandidate.split(",")[0]?.trim();
-    }
-
-    const pathCandidate = decodeURIComponent(
-      parsed.pathname.split("/").filter(Boolean).pop() ?? "",
-    )
-      .replace(/\+/g, " ")
-      .replace(/-/g, " ")
-      .trim();
-
-    return pathCandidate || "";
-  } catch {
-    return "";
-  }
-}
-
-function parseSharedText(value: string) {
-  const lines = value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const url = findFirstUrl(value);
-  const source = detectSource(url);
-  const firstNonUrlLine = lines.find((line) => !line.includes("http")) ?? "";
-  const secondaryLine = lines.find(
-    (line) => !line.includes("http") && line !== firstNonUrlLine,
-  );
-
-  return {
-    name: firstNonUrlLine || (url ? inferNameFromUrl(url) : ""),
-    address: secondaryLine ?? "",
-    url,
-    source,
-    sourceLabel: sourceLabel(source),
-  };
-}
-
 function createRestaurantPayload(draft: Draft): CreateRestaurantInput {
   const parsed = parseSharedText(draft.shareText);
   const source = parsed.url ? parsed.source : "manual";
@@ -131,6 +48,27 @@ function createRestaurantPayload(draft: Draft): CreateRestaurantInput {
     address: draft.address.trim() || parsed.address || undefined,
     notes: draft.notes.trim() || undefined,
   };
+}
+
+async function resolveSharePreview(shareText: string) {
+  const response = await fetch("/api/share-preview", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ shareText }),
+  });
+
+  const data = (await response.json()) as {
+    preview?: ReturnType<typeof parseSharedText>;
+    error?: string;
+  };
+
+  if (!response.ok || !data.preview) {
+    throw new Error(data.error ?? "Failed to resolve share link.");
+  }
+
+  return data.preview;
 }
 
 function getRandomPicks(items: RestaurantItem[], seed: number, count: number) {
@@ -262,11 +200,29 @@ export function RestaurantWishlist({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const payload = createRestaurantPayload(draft);
-
     startTransition(async () => {
       try {
         setError(null);
+        let nextDraft = draft;
+        const parsed = parseSharedText(draft.shareText);
+
+        if (parsed.url && (!draft.name.trim() || !draft.address.trim())) {
+          try {
+            const preview = await resolveSharePreview(draft.shareText);
+
+            nextDraft = {
+              ...draft,
+              name: draft.name.trim() || preview.name || draft.name,
+              address: draft.address.trim() || preview.address || draft.address,
+            };
+
+            setDraft(nextDraft);
+          } catch {
+            // Fall back to local parsing when the short-link lookup fails.
+          }
+        }
+
+        const payload = createRestaurantPayload(nextDraft);
 
         const response = await fetch("/api/restaurants", {
           method: "POST",
@@ -401,7 +357,10 @@ export function RestaurantWishlist({
                     id="share-text"
                     placeholder={"Example:\nMaru Korean Restaurant\n123 Sample Road\nhttps://maps.app.goo.gl/..."}
                     value={draft.shareText}
-                    onChange={(event) => updateDraft("shareText", event.target.value)}
+                    onChange={(event) => {
+                      updateDraft("shareText", event.target.value);
+                      setError(null);
+                    }}
                   />
                 </div>
 
