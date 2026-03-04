@@ -340,14 +340,14 @@ export function RestaurantWishlist({
 
       <section id="add" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel w-full overflow-hidden border-white/80 bg-white/92 backdrop-blur">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden border-white/80 bg-white/92 backdrop-blur">
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Add a restaurant</CardTitle>
               <CardDescription>
                 Paste share text from Google Maps or OpenRice, then store it in Redis.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-full overflow-y-auto pt-6 overscroll-contain">
+            <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="share-text">
@@ -429,14 +429,14 @@ export function RestaurantWishlist({
 
       <section id="list" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel w-full overflow-hidden border-white/80 bg-white/92 backdrop-blur">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden border-white/80 bg-white/92 backdrop-blur">
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Saved restaurants</CardTitle>
               <CardDescription>
                 This list is now backed by Redis and stays inside its own panel.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-full overflow-y-auto pt-6 overscroll-contain">
+            <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               {items.length === 0 ? (
                 <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-[var(--border-strong)] bg-white/86 p-8 text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--primary)]">
