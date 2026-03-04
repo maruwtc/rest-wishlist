@@ -377,31 +377,6 @@ export function RestaurantWishlist({
                   )}
                 </div>
               </div>
-
-              <div className="space-y-4">
-                {error ? (
-                  <Card className="border-[#f5c2c7] bg-[#fff5f5]">
-                    <CardContent className="p-5 text-sm leading-6 text-[#8a1c1c]">
-                      {error}
-                    </CardContent>
-                  </Card>
-                ) : null}
-                <Card className="bg-white/88 backdrop-blur">
-                  <CardHeader>
-                    <CardTitle>Storage</CardTitle>
-                    <CardDescription>
-                      Changes are persisted through App Router API routes backed by Redis.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge className="bg-white text-[var(--primary)]">Vercel Redis</Badge>
-                      <Badge className="bg-white">{items.length} saved</Badge>
-                      {isPending ? <Badge className="bg-white">Syncing...</Badge> : null}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </div>
         </div>
