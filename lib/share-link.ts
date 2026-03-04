@@ -114,6 +114,50 @@ function cleanGoogleTitle(title: string) {
     .trim();
 }
 
+function parseLocationText(value: string): ExtractedLocationDetails {
+  const normalized = normalizeCandidate(value);
+
+  if (!normalized) {
+    return {};
+  }
+
+  const bulletParts = normalized
+    .split(/ · | • /)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (bulletParts.length >= 2) {
+    return {
+      name: bulletParts[0],
+      address: bulletParts.slice(1).join(", "),
+    };
+  }
+
+  const commaParts = normalized
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (commaParts.length >= 2) {
+    return {
+      name: commaParts[0],
+      address: commaParts.slice(1).join(", "),
+    };
+  }
+
+  return { name: normalized };
+}
+
+function extractLocationDetailsFromTitle(title: string): ExtractedLocationDetails {
+  const cleaned = cleanGoogleTitle(title);
+
+  if (!cleaned || /^google maps$/i.test(cleaned)) {
+    return {};
+  }
+
+  return parseLocationText(cleaned);
+}
+
 export function extractLocationDetailsFromUrl(rawUrl: string): ExtractedLocationDetails {
   try {
     const url = new URL(rawUrl);
@@ -143,19 +187,7 @@ export function extractLocationDetailsFromUrl(rawUrl: string): ExtractedLocation
       return {};
     }
 
-    const parts = location
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean);
-
-    if (parts.length >= 2) {
-      return {
-        name: parts[0],
-        address: parts.slice(1).join(", "),
-      };
-    }
-
-    return { name: location };
+    return parseLocationText(location);
   } catch {
     return {};
   }
@@ -185,7 +217,7 @@ export async function resolveShareLink(shareUrl: string) {
   const details = extractLocationDetailsFromUrl(finalUrl);
 
   const contentType = response.headers.get("content-type") ?? "";
-  let titleName: string | undefined;
+  let titleDetails: ExtractedLocationDetails = {};
 
   if (contentType.includes("text/html")) {
     const body = await response.text();
@@ -193,19 +225,17 @@ export async function resolveShareLink(shareUrl: string) {
     const rawTitle = titleMatch?.[1]?.trim();
 
     if (rawTitle) {
-      const cleanedTitle = cleanGoogleTitle(rawTitle);
-
-      if (cleanedTitle && !/^google maps$/i.test(cleanedTitle)) {
-        titleName = cleanedTitle;
-      }
+      titleDetails = extractLocationDetailsFromTitle(rawTitle);
     }
   }
 
+  const resolvedSource = detectSource(finalUrl);
+
   return {
     url: finalUrl,
-    source: detectSource(finalUrl),
-    sourceLabel: sourceLabel(detectSource(finalUrl)),
-    name: details.name ?? titleName,
-    address: details.address,
+    source: resolvedSource,
+    sourceLabel: sourceLabel(resolvedSource),
+    name: titleDetails.name ?? details.name,
+    address: details.address ?? titleDetails.address,
   };
 }
