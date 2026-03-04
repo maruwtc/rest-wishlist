@@ -344,7 +344,7 @@ export function RestaurantWishlist({
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Add a restaurant</CardTitle>
               <CardDescription>
-                Paste share text from OpenRice or Google Maps, then store it in Redis.
+                Paste share text from OpenRice or Google Maps.
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
