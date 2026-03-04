@@ -432,9 +432,6 @@ export function RestaurantWishlist({
           <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden border-white/80 bg-white/92 backdrop-blur">
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Saved restaurants</CardTitle>
-              <CardDescription>
-                This list is now backed by Redis and stays inside its own panel.
-              </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               {items.length === 0 ? (
