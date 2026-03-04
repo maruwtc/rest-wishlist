@@ -378,7 +378,7 @@ export function RestaurantWishlist({
                 </div>
               </div>
 
-              {/* <div className="space-y-4">
+              <div className="space-y-4">
                 {error ? (
                   <Card className="border-[#f5c2c7] bg-[#fff5f5]">
                     <CardContent className="p-5 text-sm leading-6 text-[#8a1c1c]">
@@ -401,7 +401,7 @@ export function RestaurantWishlist({
                     </div>
                   </CardContent>
                 </Card>
-              </div> */}
+              </div>
             </div>
           </div>
         </div>
