@@ -355,7 +355,7 @@ export function RestaurantWishlist({
                   </label>
                   <Textarea
                     id="share-text"
-                    placeholder={"Example:\nMaru Korean Restaurant\n123 Sample Road\nhttps://maps.app.goo.gl/..."}
+                    placeholder={"War Rooms by Top Blade\n網址: https://s.openrice.com/QrbS0228C00~uj_kIAA"}
                     value={draft.shareText}
                     onChange={(event) => {
                       updateDraft("shareText", event.target.value);
@@ -416,7 +416,7 @@ export function RestaurantWishlist({
 
                 <Button
                   type="submit"
-                  className="w-full justify-center mt-10"
+                  className="w-full justify-center mt-6"
                   disabled={!isSubmittable || isPending}
                 >
                   {isPending ? "Saving..." : "Add to wishlist"}
