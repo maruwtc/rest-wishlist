@@ -62,47 +62,51 @@ export function LoginGate({
   }
 
   return (
-    <main className="relative flex min-h-[100svh] items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-      <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
-      <Card className="w-full max-w-md flex-col items-center space-y-4 bg-white/72 backdrop-blur dark:bg-slate-950/60">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl tracking-[-0.04em]">Enter PIN</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="w-full" onSubmit={handleSubmit}>
-            <div className="flex flex-col items-center space-y-2">
-              <InputOTP
-                id="daily-pin"
-                maxLength={6}
-                pattern={REGEXP_ONLY_DIGITS}
-                autoComplete="one-time-code"
-                value={pin}
-                onChange={(value) => {
-                  setPin(value);
-                  setError(null);
-                }}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-              {error ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
-                  {error}
+    <main className="h-[100svh] overflow-hidden">
+      <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
+        <div className="relative flex safe-screen w-full items-center justify-center overflow-hidden">
+          <ThemeToggle className="absolute right-0 top-0 z-10 sm:right-2 sm:top-2" />
+          <Card className="w-full max-w-md flex-col items-center space-y-4 bg-white/72 backdrop-blur dark:bg-slate-950/60">
+            <CardHeader className="text-center">
+              <CardTitle className="text-3xl tracking-[-0.04em]">Enter PIN</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="w-full" onSubmit={handleSubmit}>
+                <div className="flex flex-col items-center space-y-2">
+                  <InputOTP
+                    id="daily-pin"
+                    maxLength={6}
+                    pattern={REGEXP_ONLY_DIGITS}
+                    autoComplete="one-time-code"
+                    value={pin}
+                    onChange={(value) => {
+                      setPin(value);
+                      setError(null);
+                    }}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                  {error ? (
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
+                      {error}
+                    </div>
+                  ) : null}
+                  <Button type="submit" className="justify-center mt-6 w-full" disabled={pin.length !== 6}>
+                    Unlock
+                  </Button>
                 </div>
-              ) : null}
-              <Button type="submit" className="justify-center mt-6 w-full" disabled={pin.length !== 6}>
-                Unlock
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </main>
   );
 }
