@@ -11,7 +11,7 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
   default:
     "bg-[var(--primary)] text-white shadow-[0_14px_30px_rgba(26,115,232,0.24)] hover:bg-[var(--primary-strong)]",
   secondary:
-    "bg-white text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[var(--surface-muted)]",
+    "bg-[var(--surface-strong)] text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[var(--surface-muted)]",
   ghost:
     "bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]",
   destructive:

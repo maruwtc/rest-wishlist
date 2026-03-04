@@ -12,14 +12,20 @@
   --screen-safe-top: calc(var(--safe-top) + var(--mobile-chrome-gap-top));
   --screen-safe-bottom: calc(var(--safe-bottom) + var(--mobile-chrome-gap-bottom));
   --card: oklch(1 0 0);
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-raised: rgba(255, 255, 255, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.96);
   --surface-muted: #eef3fd;
   --muted-foreground: oklch(0.556 0 0);
   --primary: oklch(0.205 0 0);
   --primary-strong: #1558b0;
   --ring: oklch(0.708 0 0);
   --border: oklch(0.922 0 0);
-  --border-strong: rgba(95, 99, 104, 0.22);
+  --border-strong: rgba(95, 99, 104, 0.38);
   --danger: #d93025;
+  --danger-surface: #fff5f5;
+  --danger-border: #f5c2c7;
+  --danger-foreground: #8a1c1c;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -96,14 +102,15 @@
 }
 
 html {
-  background:
-    radial-gradient(circle at top left, rgba(26, 115, 232, 0.12), transparent 28%),
-    linear-gradient(180deg, #f7faff 0%, var(--background) 48%, #e5eefb 100%);
+  background: transparent;
+  color-scheme: light dark;
 }
 
 body {
   min-height: 100vh;
-  background: transparent;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary) 12%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 98%, #dce8ff 2%), var(--background));
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
@@ -121,10 +128,12 @@ body {
 }
 
 @keyframes float-chip {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0);
   }
+
   50% {
     transform: translate3d(0, -10px, 0);
   }
@@ -180,9 +189,19 @@ textarea {
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 14%);
+  --border-strong: rgba(255, 255, 255, 0.28);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --surface: rgba(20, 24, 31, 0.78);
+  --surface-raised: rgba(28, 33, 41, 0.72);
+  --surface-strong: rgba(34, 40, 49, 0.94);
+  --surface-muted: rgba(255, 255, 255, 0.08);
+  --primary-strong: #dfe7f5;
+  --danger: #ff8a80;
+  --danger-surface: rgba(255, 138, 128, 0.12);
+  --danger-border: rgba(255, 138, 128, 0.34);
+  --danger-foreground: #ffd7d2;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

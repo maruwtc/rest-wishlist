@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   type CreateRestaurantInput,
   type RestaurantItem,
@@ -89,16 +90,8 @@ function getRandomPicks(items: RestaurantItem[], seed: number, count: number) {
   return picks;
 }
 
-function getStableSeed(items: RestaurantItem[]) {
-  return items.reduce((seed, item, index) => {
-    let next = seed + index;
-
-    for (const char of item.id) {
-      next = (next * 31 + char.charCodeAt(0)) % 233280;
-    }
-
-    return next;
-  }, items.length || 1);
+function createRandomSeed() {
+  return Math.floor(Math.random() * 233280) || 1;
 }
 
 function RestaurantRow({
@@ -111,7 +104,7 @@ function RestaurantRow({
   deleting: boolean;
 }) {
   return (
-    <article className="rounded-[26px] border border-[var(--border)] bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
+    <article className="rounded-[26px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -139,13 +132,25 @@ function RestaurantRow({
           onClick={() => onDelete(item.id)}
           disabled={deleting}
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M9 3h6" />
-            <path d="M4 7h16" />
-            <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
-            <path d="M10 11v6" />
-            <path d="M14 11v6" />
-          </svg>
+          {deleting ? (
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 animate-spin"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M12 3a9 9 0 1 0 9 9" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M9 3h6" />
+              <path d="M4 7h16" />
+              <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+            </svg>
+          )}
         </Button>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[var(--muted-foreground)]">
@@ -175,8 +180,13 @@ export function RestaurantWishlist({
   const [draft, setDraft] = useState<Draft>(initialDraft);
   const [items, setItems] = useState<RestaurantItem[]>(initialItems);
   const [error, setError] = useState<string | null>(initialError);
+  const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [shuffleSeed, setShuffleSeed] = useState(1);
+
+  useEffect(() => {
+    setShuffleSeed(createRandomSeed());
+  }, []);
 
   const parsedPreview = useMemo(
     () => parseSharedText(draft.shareText),
@@ -186,8 +196,8 @@ export function RestaurantWishlist({
     draft.shareText.trim() || draft.name.trim() || draft.address.trim() || draft.notes.trim(),
   );
   const randomPicks = useMemo(
-    () => getRandomPicks(items, getStableSeed(items), Math.min(3, items.length)),
-    [items],
+    () => getRandomPicks(items, shuffleSeed, Math.min(3, items.length)),
+    [items, shuffleSeed],
   );
 
   function updateDraft<Key extends keyof Draft>(key: Key, value: Draft[Key]) {
@@ -200,8 +210,9 @@ export function RestaurantWishlist({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    startTransition(async () => {
+    void (async () => {
       try {
+        setIsAdding(true);
         setError(null);
         let nextDraft = draft;
         const parsed = parseSharedText(draft.shareText);
@@ -242,6 +253,7 @@ export function RestaurantWishlist({
         }
 
         setItems((current) => [data.item!, ...current]);
+        setShuffleSeed(createRandomSeed());
         setDraft(initialDraft);
       } catch (submitError) {
         setError(
@@ -249,12 +261,14 @@ export function RestaurantWishlist({
             ? submitError.message
             : "Failed to save restaurant.",
         );
+      } finally {
+        setIsAdding(false);
       }
-    });
+    })();
   }
 
   function handleDelete(id: string) {
-    startTransition(async () => {
+    void (async () => {
       try {
         setError(null);
         setDeletingId(id);
@@ -272,6 +286,7 @@ export function RestaurantWishlist({
         }
 
         setItems(data.items);
+        setShuffleSeed(createRandomSeed());
       } catch (deleteError) {
         setError(
           deleteError instanceof Error
@@ -281,47 +296,48 @@ export function RestaurantWishlist({
       } finally {
         setDeletingId(null);
       }
-    });
+    })();
   }
 
   return (
     <main className="h-[100svh] snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth">
       <section className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <div className="relative safe-screen w-full overflow-y-auto rounded-[36px] border border-white/70 bg-[radial-gradient(circle_at_top_left,#ffffff_0%,#eaf2ff_42%,#dce8ff_100%)] px-5 py-6 shadow-[0_30px_80px_rgba(60,64,67,0.12)] overscroll-contain sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-            <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_center,rgba(26,115,232,0.12),transparent_68%)] lg:block" />
-            <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-end">
-              <div className="flex flex-col justify-between gap-8">
-                <div className="space-y-4">
-                  <div className="space-y-3">
-                    <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-[var(--foreground)] sm:text-5xl md:text-6xl">
-                      Restaurant wishlist
-                    </h1>
-                  </div>
+          <div className="relative safe-screen w-full overflow-y-auto rounded-[36px] border border-[var(--border-strong)] bg-[var(--surface)] px-5 py-6 overscroll-contain sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+            <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
+            <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
+              <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
+                <div className="flex space-y-4 justify-center lg:justify-start">
+                  <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-[var(--foreground)] sm:text-5xl md:text-6xl lg:text-7xl">
+                    Restaurant wishlist
+                  </h1>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)] flex-row justify-between items-center">
-                  <span>Click or scroll</span>
-                  <div>
-                    <a className="rounded-full bg-white px-4 py-2 font-medium text-[var(--foreground)]" href="#add">
+                <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted-foreground)]">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span>Click or scroll</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <a className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-2 font-medium text-[var(--foreground)]" href="#add">
                       Add a restaurant
                     </a>
-                    <a className="rounded-full bg-white/70 px-4 py-2 font-medium text-[var(--foreground)]" href="#list">
+                    <a className="rounded-full border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-2 font-medium text-[var(--foreground)]" href="#list">
                       View saved list
                     </a>
                   </div>
                 </div>
-                <div>
+
+                <div className="">
                   {randomPicks.length === 0 ? (
-                    <div className="rounded-[22px] bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted-foreground)]">
-                      Save a few restaurants first, then this section will surface random picks from Redis.
+                    <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted-foreground)]">
+                      Save a few restaurants first, then this section will surface random picks.
                     </div>
                   ) : (
                     <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
                       {randomPicks.map((item, index) => (
                         <div
                           key={item.id}
-                          className="float-chip rounded-full border border-white/80 bg-white px-5 py-3 text-base font-semibold text-[var(--foreground)] shadow-[0_16px_32px_rgba(26,115,232,0.12)]"
+                          className="float-chip rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-5 py-3 text-base font-semibold text-[var(--foreground)] shadow-[0_16px_32px_rgba(26,115,232,0.12)]"
                           style={{
                             animationDelay: `${index * 0.45}s`,
                           }}
@@ -333,6 +349,9 @@ export function RestaurantWishlist({
                   )}
                 </div>
               </div>
+              <div className="flex items-center justify-center">
+                <ThemeToggle />
+              </div>
             </div>
           </div>
         </div>
@@ -340,7 +359,7 @@ export function RestaurantWishlist({
 
       <section id="add" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden border-white/80 bg-white/92 backdrop-blur">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-[var(--surface)] backdrop-blur">
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Add a restaurant</CardTitle>
               <CardDescription>
@@ -349,13 +368,18 @@ export function RestaurantWishlist({
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               <form className="space-y-4" onSubmit={handleSubmit}>
+                {error ? (
+                  <div className="rounded-[22px] border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-foreground)]">
+                    {error}
+                  </div>
+                ) : null}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="share-text">
                     Share text or link
                   </label>
                   <Textarea
                     id="share-text"
-                    placeholder={"War Rooms by Top Blade\n網址: https://s.openrice.com/QrbS0228C00~uj_kIAA"}
+                    placeholder={"War Rooms by Top Blade\n網址: https://s.openrice.com/QrbS0228C00~uj_kIAA\n..."}
                     value={draft.shareText}
                     onChange={(event) => {
                       updateDraft("shareText", event.target.value);
@@ -417,9 +441,9 @@ export function RestaurantWishlist({
                 <Button
                   type="submit"
                   className="w-full justify-center mt-6"
-                  disabled={!isSubmittable || isPending}
+                  disabled={!isSubmittable || isAdding}
                 >
-                  {isPending ? "Saving..." : "Add to wishlist"}
+                  {isAdding ? "Saving..." : "Add to wishlist"}
                 </Button>
               </form>
             </CardContent>
@@ -429,13 +453,13 @@ export function RestaurantWishlist({
 
       <section id="list" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden border-white/80 bg-white/92 backdrop-blur">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-[var(--surface)] backdrop-blur">
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Saved restaurants</CardTitle>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               {items.length === 0 ? (
-                <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-[var(--border-strong)] bg-white/86 p-8 text-center">
+                <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-[var(--border-strong)] bg-[var(--surface-raised)] p-8 text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--primary)]">
                     <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M4 8h16" />
@@ -459,7 +483,7 @@ export function RestaurantWishlist({
                       key={item.id}
                       item={item}
                       onDelete={handleDelete}
-                      deleting={deletingId === item.id && isPending}
+                      deleting={deletingId === item.id}
                     />
                   ))}
                 </div>

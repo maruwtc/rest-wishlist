@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const SESSION_KEY = "maru-login-day";
 
@@ -37,17 +33,13 @@ export function LoginGate({
 }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [todayLabel, setTodayLabel] = useState("");
-
-  useEffect(() => {
-    const { key, label } = getTodayPinParts();
-    setTodayLabel(label);
-
-    if (window.sessionStorage.getItem(SESSION_KEY) === key) {
-      setIsUnlocked(true);
+  const [isUnlocked, setIsUnlocked] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
     }
-  }, []);
+
+    return window.sessionStorage.getItem(SESSION_KEY) === getTodayPinParts().key;
+  });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,8 +62,9 @@ export function LoginGate({
   }
 
   return (
-    <main className="flex min-h-[100svh] items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md border-white/80 bg-white/92 backdrop-blur flex-col items-center space-y-4">
+    <main className="relative flex min-h-[100svh] items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
+      <Card className="w-full max-w-md flex-col items-center space-y-4 bg-[var(--surface)] backdrop-blur">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl tracking-[-0.04em]">Enter PIN</CardTitle>
         </CardHeader>
@@ -99,7 +92,7 @@ export function LoginGate({
                 </InputOTPGroup>
               </InputOTP>
               {error ? (
-                <div className="rounded-2xl border border-[#f5c2c7] bg-[#fff5f5] px-4 py-3 text-sm text-[#8a1c1c]">
+                <div className="rounded-2xl border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-foreground)]">
                   {error}
                 </div>
               ) : null}
