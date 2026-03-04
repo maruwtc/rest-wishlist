@@ -64,7 +64,7 @@ export function LoginGate({
   return (
     <main className="relative flex min-h-[100svh] items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
       <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
-      <Card className="w-full max-w-md flex-col items-center space-y-4 bg-[var(--surface)] backdrop-blur">
+      <Card className="w-full max-w-md flex-col items-center space-y-4 bg-white/72 backdrop-blur dark:bg-slate-950/60">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl tracking-[-0.04em]">Enter PIN</CardTitle>
         </CardHeader>
@@ -92,7 +92,7 @@ export function LoginGate({
                 </InputOTPGroup>
               </InputOTP>
               {error ? (
-                <div className="rounded-2xl border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-foreground)]">
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
                   {error}
                 </div>
               ) : null}

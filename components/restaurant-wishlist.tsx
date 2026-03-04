@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,22 +104,22 @@ function RestaurantRow({
   deleting: boolean;
 }) {
   return (
-    <article className="rounded-[26px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
+    <article className="rounded-[26px] border border-slate-300 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:border-white/15 dark:bg-slate-900/70 dark:shadow-[0_12px_40px_rgba(2,6,23,0.28)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold tracking-[-0.02em] text-[var(--foreground)]">
+            <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-950 dark:text-white">
               {item.name}
             </h3>
             <Badge>{item.sourceLabel}</Badge>
           </div>
           {item.address ? (
-            <p className="text-sm leading-6 text-[var(--muted-foreground)]">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
               {item.address}
             </p>
           ) : null}
           {item.notes ? (
-            <p className="text-sm leading-6 text-[var(--foreground)]/78">
+            <p className="text-sm leading-6 text-slate-700 dark:text-slate-200/85">
               {item.notes}
             </p>
           ) : null}
@@ -153,11 +153,11 @@ function RestaurantRow({
           )}
         </Button>
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[var(--muted-foreground)]">
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
         <span>{formatRelativeDate(item.createdAt)}</span>
         {item.url ? (
           <a
-            className="font-medium text-[var(--primary)] hover:text-[var(--primary-strong)]"
+            className="font-medium text-sky-700 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200"
             href={item.url}
             target="_blank"
             rel="noreferrer"
@@ -182,11 +182,7 @@ export function RestaurantWishlist({
   const [error, setError] = useState<string | null>(initialError);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [shuffleSeed, setShuffleSeed] = useState(1);
-
-  useEffect(() => {
-    setShuffleSeed(createRandomSeed());
-  }, []);
+  const [shuffleSeed, setShuffleSeed] = useState(createRandomSeed);
 
   const parsedPreview = useMemo(
     () => parseSharedText(draft.shareText),
@@ -303,25 +299,25 @@ export function RestaurantWishlist({
     <main className="h-[100svh] snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth">
       <section className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <div className="relative safe-screen w-full overflow-y-auto rounded-[36px] border border-[var(--border-strong)] bg-[var(--surface)] px-5 py-6 overscroll-contain sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+          <div className="relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
             <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
             <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
               <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
                 <div className="flex space-y-4 justify-center lg:justify-start">
-                  <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-[var(--foreground)] sm:text-5xl md:text-6xl lg:text-7xl">
+                  <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white">
                     Restaurant wishlist
                   </h1>
                 </div>
 
-                <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted-foreground)]">
+                <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
                   <div className="flex flex-wrap items-center gap-3">
                     <span>Click or scroll</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <a className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-2 font-medium text-[var(--foreground)]" href="#add">
+                    <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#add">
                       Add a restaurant
                     </a>
-                    <a className="rounded-full border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-2 font-medium text-[var(--foreground)]" href="#list">
+                    <a className="rounded-full border border-slate-300 bg-slate-100/90 px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/6 dark:text-white" href="#list">
                       View saved list
                     </a>
                   </div>
@@ -329,7 +325,7 @@ export function RestaurantWishlist({
 
                 <div className="">
                   {randomPicks.length === 0 ? (
-                    <div className="rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted-foreground)]">
+                    <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
                       Save a few restaurants first, then this section will surface random picks.
                     </div>
                   ) : (
@@ -337,7 +333,7 @@ export function RestaurantWishlist({
                       {randomPicks.map((item, index) => (
                         <div
                           key={item.id}
-                          className="float-chip rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-5 py-3 text-base font-semibold text-[var(--foreground)] shadow-[0_16px_32px_rgba(26,115,232,0.12)]"
+                          className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
                           style={{
                             animationDelay: `${index * 0.45}s`,
                           }}
@@ -359,8 +355,8 @@ export function RestaurantWishlist({
 
       <section id="add" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-[var(--surface)] backdrop-blur">
-            <CardHeader className="border-b border-[var(--border)] pb-5">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
+            <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
               <CardTitle>Add a restaurant</CardTitle>
               <CardDescription>
                 Paste share text from OpenRice or Google Maps.
@@ -369,12 +365,12 @@ export function RestaurantWishlist({
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               <form className="space-y-4" onSubmit={handleSubmit}>
                 {error ? (
-                  <div className="rounded-[22px] border border-[var(--danger-border)] bg-[var(--danger-surface)] px-4 py-3 text-sm text-[var(--danger-foreground)]">
+                  <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
                     {error}
                   </div>
                 ) : null}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="share-text">
+                  <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="share-text">
                     Share text or link
                   </label>
                   <Textarea
@@ -390,7 +386,7 @@ export function RestaurantWishlist({
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="name">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="name">
                       Name
                     </label>
                     <Input
@@ -401,7 +397,7 @@ export function RestaurantWishlist({
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="address">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="address">
                       Address
                     </label>
                     <Input
@@ -412,7 +408,7 @@ export function RestaurantWishlist({
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="notes">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="notes">
                       Notes
                     </label>
                     <Textarea
@@ -424,20 +420,6 @@ export function RestaurantWishlist({
                     />
                   </div>
                 </div>
-
-                {/* <div className="rounded-[24px] bg-[var(--surface-muted)] p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-                    Parsed preview
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge className={cn(parsedPreview.url ? "bg-white text-[var(--primary)]" : "")}>
-                      {parsedPreview.sourceLabel}
-                    </Badge>
-                    {parsedPreview.name ? <Badge className="bg-white">{parsedPreview.name}</Badge> : null}
-                    {parsedPreview.address ? <Badge className="bg-white">{parsedPreview.address}</Badge> : null}
-                  </div>
-                </div> */}
-
                 <Button
                   type="submit"
                   className="w-full justify-center mt-6"
@@ -453,14 +435,14 @@ export function RestaurantWishlist({
 
       <section id="list" className="h-[100svh] snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-[var(--surface)] backdrop-blur">
-            <CardHeader className="border-b border-[var(--border)] pb-5">
+          <Card className="safe-panel flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
+            <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
               <CardTitle>Saved restaurants</CardTitle>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
               {items.length === 0 ? (
-                <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-[var(--border-strong)] bg-[var(--surface-raised)] p-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--primary)]">
+                <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-slate-300 bg-slate-100/70 p-8 text-center dark:border-white/15 dark:bg-white/6">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-sky-700 dark:bg-white/10 dark:text-sky-300">
                     <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M4 8h16" />
                       <path d="M6 4h12l2 4H4l2-4Z" />
@@ -468,10 +450,10 @@ export function RestaurantWishlist({
                     </svg>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold tracking-[-0.03em] text-[var(--foreground)]">
+                    <h3 className="text-lg font-semibold tracking-[-0.03em] text-slate-950 dark:text-white">
                       No saved spots yet
                     </h3>
-                    <p className="mx-auto max-w-sm text-sm leading-6 text-[var(--muted-foreground)]">
+                    <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
                       Start by pasting a Google Maps or OpenRice share link. New entries will persist in Redis.
                     </p>
                   </div>

@@ -15,7 +15,6 @@ const themeScript = `
     ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
     : mode;
   document.documentElement.classList.toggle("dark", resolved === "dark");
-  document.documentElement.dataset.theme = mode;
 })();
 `;
 
@@ -29,7 +28,9 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body className="bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_32%),linear-gradient(180deg,#f8fbff_0%,#ffffff_55%,#f3f7ff_100%)] text-slate-950 dark:bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.12),transparent_28%),linear-gradient(180deg,#020617_0%,#0f172a_58%,#111827_100%)] dark:text-slate-50">
+        {children}
+      </body>
     </html>
   );
 }

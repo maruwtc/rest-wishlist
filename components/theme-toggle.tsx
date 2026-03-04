@@ -22,7 +22,6 @@ function applyTheme(mode: ThemeMode) {
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const resolvedMode = mode === "system" ? (media.matches ? "dark" : "light") : mode;
   document.documentElement.classList.toggle("dark", resolvedMode === "dark");
-  document.documentElement.dataset.theme = mode;
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
@@ -66,7 +65,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-[var(--border-strong)] bg-[var(--surface-raised)]/90 p-1 text-xs text-[var(--muted-foreground)] backdrop-blur",
+        "inline-flex items-center gap-1 rounded-full border border-slate-300/80 bg-white/80 p-1 text-xs text-slate-600 backdrop-blur dark:border-white/15 dark:bg-slate-900/80 dark:text-slate-300",
         className,
       )}
       aria-label="Theme"
@@ -82,8 +81,8 @@ export function ThemeToggle({ className }: { className?: string }) {
             className={cn(
               "inline-flex h-9 items-center gap-2 rounded-full px-3 font-medium",
               isActive
-                ? "bg-[var(--surface-strong)] text-[var(--foreground)]"
-                : "hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]",
+                ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950"
+                : "hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-white/10 dark:hover:text-white",
             )}
             aria-pressed={isActive}
           >

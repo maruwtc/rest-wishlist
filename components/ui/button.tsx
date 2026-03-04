@@ -9,13 +9,13 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
   default:
-    "bg-[var(--primary)] text-white shadow-[0_14px_30px_rgba(26,115,232,0.24)] hover:bg-[var(--primary-strong)]",
+    "bg-slate-950 text-white shadow-[0_14px_30px_rgba(15,23,42,0.18)] hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200",
   secondary:
-    "bg-[var(--surface-strong)] text-[var(--foreground)] ring-1 ring-[var(--border)] hover:bg-[var(--surface-muted)]",
+    "bg-white text-slate-950 ring-1 ring-slate-300 hover:bg-slate-100 dark:bg-white/8 dark:text-white dark:ring-white/15 dark:hover:bg-white/12",
   ghost:
-    "bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]",
+    "bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white",
   destructive:
-    "bg-[var(--danger)] text-white shadow-[0_12px_24px_rgba(217,48,37,0.18)] hover:bg-[#b3261e]",
+    "bg-rose-600 text-white shadow-[0_12px_24px_rgba(225,29,72,0.2)] hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-400",
 };
 
 const sizeClasses: Record<NonNullable<ButtonProps["size"]>, string> = {
@@ -31,7 +31,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type ?? "button"}
         className={cn(
-          "inline-flex items-center justify-center rounded-full text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-[var(--background)]",
+          "inline-flex items-center justify-center rounded-full text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-white dark:ring-offset-slate-950",
           variantClasses[variant],
           sizeClasses[size],
           className,
