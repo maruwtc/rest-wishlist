@@ -344,7 +344,7 @@ export function RestaurantWishlist({
             <CardHeader className="border-b border-[var(--border)] pb-5">
               <CardTitle>Add a restaurant</CardTitle>
               <CardDescription>
-                Paste share text from Google Maps or OpenRice, then store it in Redis.
+                Paste share text from OpenRice or Google Maps, then store it in Redis.
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
@@ -387,18 +387,18 @@ export function RestaurantWishlist({
                       onChange={(event) => updateDraft("address", event.target.value)}
                     />
                   </div>
-                  {/* <div className="space-y-2 sm:col-span-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <label className="text-sm font-medium text-[var(--foreground)]" htmlFor="notes">
                       Notes
                     </label>
                     <Textarea
                       id="notes"
-                      className="min-h-24"
+                      className="min-h-18"
                       placeholder="Good for late dinner, date night, omakase, queue is long..."
                       value={draft.notes}
                       onChange={(event) => updateDraft("notes", event.target.value)}
                     />
-                  </div> */}
+                  </div>
                 </div>
 
                 {/* <div className="rounded-[24px] bg-[var(--surface-muted)] p-4">
@@ -416,7 +416,7 @@ export function RestaurantWishlist({
 
                 <Button
                   type="submit"
-                  className="w-full justify-center"
+                  className="w-full justify-center mt-10"
                   disabled={!isSubmittable || isPending}
                 >
                   {isPending ? "Saving..." : "Add to wishlist"}
