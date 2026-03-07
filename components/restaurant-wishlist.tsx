@@ -509,194 +509,192 @@ export function RestaurantWishlist({
   }
 
   return (
-    <main className="h-[100svh] overflow-hidden">
-      <div className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth touch-pan-y">
-        <section className="h-[100svh] snap-start snap-always overflow-hidden">
-          <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-            <div className="mobile-scroll-fix relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
-              <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
-              <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
-                <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
-                  <div className="flex space-y-4 justify-center lg:justify-start">
-                    <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white">
-                      Restaurant wishlist
-                    </h1>
-                  </div>
-
-                  <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#add">
-                        Add a restaurant
-                      </a>
-                      <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#list">
-                        View saved list
-                      </a>
-                    </div>
-                  </div>
-
-
-                  {error ? (
-                    <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
-                      {error.includes("Redis is not configured")
-                        ? "Please check with administrator. Hint: Database connection"
-                        : "An error occurred. Please check with administrator."}
-                    </div>
-                  ) :
-                    <div className="">
-                      {randomPicks.length === 0 ? (
-                        <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
-                          Save a few restaurants first, then this section will surface random picks.
-                        </div>
-                      ) : (
-                        <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
-                          {randomPicks.map((item, index) => (
-                            <div
-                              key={item.id}
-                              className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
-                              style={{
-                                animationDelay: `${index * 0.45}s`,
-                              }}
-                            >
-                              {item.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>}
+    <main className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth touch-pan-y">
+      <section className="h-dvh snap-start snap-always overflow-hidden">
+        <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8 overflow-hidden">
+          <div className="mobile-scroll-fix relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
+            <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
+            <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
+              <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
+                <div className="flex space-y-4 justify-center lg:justify-start">
+                  <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white">
+                    Restaurant wishlist
+                  </h1>
                 </div>
-                <div className="flex items-center justify-center">
-                  <ThemeToggle />
+
+                <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#add">
+                      Add a restaurant
+                    </a>
+                    <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#list">
+                      View saved list
+                    </a>
+                  </div>
                 </div>
+
+
+                {error ? (
+                  <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
+                    {error.includes("Redis is not configured")
+                      ? "Please check with administrator. Hint: Database connection"
+                      : "An error occurred. Please check with administrator."}
+                  </div>
+                ) :
+                  <div className="">
+                    {randomPicks.length === 0 ? (
+                      <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
+                        Save a few restaurants first, then this section will surface random picks.
+                      </div>
+                    ) : (
+                      <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
+                        {randomPicks.map((item, index) => (
+                          <div
+                            key={item.id}
+                            className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
+                            style={{
+                              animationDelay: `${index * 0.45}s`,
+                            }}
+                          >
+                            {item.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>}
+              </div>
+              <div className="flex items-center justify-center">
+                <ThemeToggle />
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="add" className="h-[100svh] snap-start snap-always overflow-hidden">
-          <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-            <Card className="safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
-              <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
-                <CardTitle>Add a restaurant</CardTitle>
-                <CardDescription>
-                  Paste share text from OpenRice or Google Maps.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="mobile-scroll-fix min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="share-text">
-                      Share text or link
+      <section id="add" className="h-dvh snap-start snap-always overflow-hidden">
+        <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
+          <Card className="safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
+            <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
+              <CardTitle>Add a restaurant</CardTitle>
+              <CardDescription>
+                Paste share text from OpenRice or Google Maps.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mobile-scroll-fix min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="share-text">
+                    Share text or link
+                  </label>
+                  <Textarea
+                    id="share-text"
+                    placeholder={"War Rooms by Top Blade\n網址: https://s.openrice.com/QrbS0228C00~uj_kIAA\n..."}
+                    value={draft.shareText}
+                    onChange={(event) => {
+                      updateDraft("shareText", event.target.value);
+                      setError(null);
+                    }}
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="name">
+                      Name
                     </label>
-                    <Textarea
-                      id="share-text"
-                      placeholder={"War Rooms by Top Blade\n網址: https://s.openrice.com/QrbS0228C00~uj_kIAA\n..."}
-                      value={draft.shareText}
-                      onChange={(event) => {
-                        updateDraft("shareText", event.target.value);
-                        setError(null);
-                      }}
+                    <Input
+                      id="name"
+                      placeholder={parsedPreview.name || "Restaurant name"}
+                      value={draft.name}
+                      onChange={(event) => updateDraft("name", event.target.value)}
                     />
                   </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="name">
-                        Name
-                      </label>
-                      <Input
-                        id="name"
-                        placeholder={parsedPreview.name || "Restaurant name"}
-                        value={draft.name}
-                        onChange={(event) => updateDraft("name", event.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="address">
-                        Address
-                      </label>
-                      <Input
-                        id="address"
-                        placeholder={parsedPreview.address || "Area or address"}
-                        value={draft.address}
-                        onChange={(event) => updateDraft("address", event.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="notes">
-                        Notes
-                      </label>
-                      <Textarea
-                        id="notes"
-                        className="min-h-18"
-                        placeholder="Good for late dinner, date night, omakase, queue is long..."
-                        value={draft.notes}
-                        onChange={(event) => updateDraft("notes", event.target.value)}
-                      />
-                    </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="address">
+                      Address
+                    </label>
+                    <Input
+                      id="address"
+                      placeholder={parsedPreview.address || "Area or address"}
+                      value={draft.address}
+                      onChange={(event) => updateDraft("address", event.target.value)}
+                    />
                   </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full justify-center mt-6"
-                    disabled={!isSubmittable || isAdding}
-                  >
-                    {isAdding ? "Saving..." : "Add to wishlist"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="list" className="h-[100svh] snap-start snap-always overflow-hidden">
-          <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-            <Card className="relative safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
-              <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
-                <CardTitle>Saved restaurants</CardTitle>
-              </CardHeader>
-              <CardContent className="mobile-scroll-fix relative min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
-                {items.length === 0 ? (
-                  <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-slate-300 p-8 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-sky-700 dark:bg-white/10 dark:text-sky-300">
-                      <Store className="h-8 w-8" />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold tracking-[-0.03em] text-slate-950 dark:text-white">
-                        No saved spots yet
-                      </h3>
-                      <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Start by pasting a Google Maps or OpenRice share link.
-                      </p>
-                    </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="notes">
+                      Notes
+                    </label>
+                    <Textarea
+                      id="notes"
+                      className="min-h-18"
+                      placeholder="Good for late dinner, date night, omakase, queue is long..."
+                      value={draft.notes}
+                      onChange={(event) => updateDraft("notes", event.target.value)}
+                    />
                   </div>
-                ) : (
-                  <div className="space-y-4 pr-1">
-                    {items.map((item) => (
-                      <RestaurantRow
-                        key={item.id}
-                        item={item}
-                        onRequestDelete={requestDelete}
-                        deleting={deletingId === item.id}
-                        onOpenPopup={openDetails}
-                      />
-                    ))}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full justify-center mt-6"
+                  disabled={!isSubmittable || isAdding}
+                >
+                  {isAdding ? "Saving..." : "Add to wishlist"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section id="list" className="h-dvh snap-start snap-always overflow-hidden">
+        <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
+          <Card className="relative safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
+            <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
+              <CardTitle>Saved restaurants</CardTitle>
+            </CardHeader>
+            <CardContent className="mobile-scroll-fix relative min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
+              {items.length === 0 ? (
+                <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-slate-300 p-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-sky-700 dark:bg-white/10 dark:text-sky-300">
+                    <Store className="h-8 w-8" />
                   </div>
-                )}
-              </CardContent>
-              {openItem ? (
-                <RestaurantDetailsPopup
-                  item={openItem}
-                  onClose={() => setOpenItemId(null)}
-                  onChangeRating={handleUpdateRating}
-                  onToggleStatus={handleToggleStatus}
-                  savingRating={savingRatingId === openItem.id}
-                  savingStatus={savingStatusId === openItem.id}
-                />
-              ) : null}
-            </Card>
-          </div>
-        </section>
-      </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold tracking-[-0.03em] text-slate-950 dark:text-white">
+                      No saved spots yet
+                    </h3>
+                    <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Start by pasting a Google Maps or OpenRice share link.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 pr-1">
+                  {items.map((item) => (
+                    <RestaurantRow
+                      key={item.id}
+                      item={item}
+                      onRequestDelete={requestDelete}
+                      deleting={deletingId === item.id}
+                      onOpenPopup={openDetails}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+            {openItem ? (
+              <RestaurantDetailsPopup
+                item={openItem}
+                onClose={() => setOpenItemId(null)}
+                onChangeRating={handleUpdateRating}
+                onToggleStatus={handleToggleStatus}
+                savingRating={savingRatingId === openItem.id}
+                savingStatus={savingStatusId === openItem.id}
+              />
+            ) : null}
+          </Card>
+        </div>
+      </section>
       {deleteTarget ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4"

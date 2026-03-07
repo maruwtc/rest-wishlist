@@ -62,7 +62,7 @@ export function LoginGate({
   }
 
   return (
-    <main className="h-screen max-h-screen overflow-hidden">
+    <main className="h-dvh max-h-dvh overflow-hidden">
       <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
         <div className="relative flex safe-screen w-full items-center justify-center overflow-hidden">
           <ThemeToggle className="absolute right-0 top-0 z-10 sm:right-2 sm:top-2" />

@@ -21,7 +21,19 @@ const OPTIONS: Array<{
 function applyTheme(mode: ThemeMode) {
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const resolvedMode = mode === "system" ? (media.matches ? "dark" : "light") : mode;
-  document.documentElement.classList.toggle("dark", resolvedMode === "dark");
+  const isDark = resolvedMode === "dark";
+  const color = isDark ? "#020617" : "#f8fbff";
+  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.style.backgroundColor = color;
+  document.body.style.backgroundColor = color;
+
+  let themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!themeColorMeta) {
+    themeColorMeta = document.createElement("meta");
+    themeColorMeta.name = "theme-color";
+    document.head.appendChild(themeColorMeta);
+  }
+  themeColorMeta.content = color;
 }
 
 export function ThemeToggle({ className }: { className?: string }) {

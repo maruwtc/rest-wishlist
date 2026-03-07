@@ -18,13 +18,20 @@
 }
 
 html {
-  background: transparent;
+  background: #f8fbff;
   color-scheme: light dark;
+  height: 100%;
+  overflow: hidden;
+}
+
+html.dark {
+  background: #020617;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
@@ -34,7 +41,7 @@ body {
 }
 
 .safe-screen {
-  height: calc(100svh - var(--screen-safe-top) - var(--screen-safe-bottom));
+  height: calc(100dvh - var(--screen-safe-top) - var(--screen-safe-bottom));
 }
 
 .mobile-scroll-fix {
