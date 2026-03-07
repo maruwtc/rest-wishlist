@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -287,6 +287,7 @@ export function RestaurantWishlist({
   initialItems: RestaurantItem[];
   initialError: string | null;
 }) {
+  const heroScrollRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<Draft>(initialDraft);
   const [items, setItems] = useState<RestaurantItem[]>(initialItems);
   const [error, setError] = useState<string | null>(initialError);
@@ -297,6 +298,7 @@ export function RestaurantWishlist({
   const [savingRatingId, setSavingRatingId] = useState<string | null>(null);
   const [savingStatusId, setSavingStatusId] = useState<string | null>(null);
   const [shuffleSeed, setShuffleSeed] = useState(createRandomSeed);
+  const [pickCount, setPickCount] = useState(() => Math.min(10, initialItems.length));
 
   const parsedPreview = useMemo(
     () => parseSharedText(draft.shareText),
@@ -305,14 +307,55 @@ export function RestaurantWishlist({
   const isSubmittable = Boolean(
     draft.shareText.trim() || draft.name.trim() || draft.address.trim() || draft.notes.trim(),
   );
+  const maxPickCount = Math.min(10, items.length);
   const randomPicks = useMemo(
-    () => getRandomPicks(items, shuffleSeed, Math.min(3, items.length)),
-    [items, shuffleSeed],
+    () => getRandomPicks(items, shuffleSeed, Math.min(pickCount, maxPickCount)),
+    [items, shuffleSeed, pickCount, maxPickCount],
   );
   const openItem = useMemo(
     () => items.find((item) => item.id === openItemId) ?? null,
     [items, openItemId],
   );
+
+  useEffect(() => {
+    setPickCount(maxPickCount);
+  }, [maxPickCount, shuffleSeed]);
+
+  useLayoutEffect(() => {
+    const container = heroScrollRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const overflows = container.scrollHeight > container.clientHeight + 1;
+
+    if (overflows && pickCount > 1) {
+      setPickCount((current) => Math.max(1, current - 1));
+    }
+  }, [pickCount, randomPicks]);
+
+  useEffect(() => {
+    const container = heroScrollRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      setPickCount((current) => {
+        if (maxPickCount === 0) {
+          return 0;
+        }
+
+        return current < maxPickCount ? maxPickCount : current;
+      });
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [maxPickCount]);
 
   function updateDraft<Key extends keyof Draft>(key: Key, value: Draft[Key]) {
     setDraft((current) => ({
@@ -512,7 +555,10 @@ export function RestaurantWishlist({
     <main className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth touch-pan-y">
       <section className="h-dvh snap-start snap-always overflow-hidden">
         <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="mobile-scroll-fix relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
+          <div
+            ref={heroScrollRef}
+            className="mobile-scroll-fix relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45"
+          >
             <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
             <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
               <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
