@@ -131,7 +131,7 @@ function RestaurantRow({
           onClick={() => onOpenPopup(item.id)}
           aria-label={`Open details for ${item.name}`}
         >
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col items-start gap-2">
             <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-950 dark:text-white">
               {item.name}
             </h3>
@@ -162,7 +162,7 @@ function RestaurantRow({
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0 rounded-full"
+          className="shrink-0 rounded-full border border-rose-300 p-0 text-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-rose-300 dark:border-rose-400/30 dark:text-rose-400 dark:hover:bg-rose-500/10 dark:disabled:border-rose-400/30 dark:disabled:text-rose-600"
           aria-label={`Delete ${item.name}`}
           onClick={() => onRequestDelete(item)}
           disabled={deleting}
@@ -170,7 +170,7 @@ function RestaurantRow({
           {deleting ? (
             <Spinner />
           ) : (
-            <Trash className="h-5 w-5 text-slate-300 hover:text-rose-600 dark:text-slate-600 dark:hover:text-rose-500" />
+            <Trash className="h-5 w-5 text-rose-500 dark:text-rose-400" />
           )}
         </Button>
       </div>
