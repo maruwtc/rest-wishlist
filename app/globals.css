@@ -37,6 +37,12 @@ body {
   height: calc(100svh - var(--screen-safe-top) - var(--screen-safe-bottom));
 }
 
+.mobile-scroll-fix {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
 @keyframes float-chip {
 
   0%,

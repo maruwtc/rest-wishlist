@@ -4,10 +4,13 @@ import {
   createRestaurant,
   listRestaurants,
   type CreateRestaurantInput,
+  type RestaurantStatus,
 } from "@/lib/restaurant-store";
 import { isRedisConfigured } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
+const VALID_STATUSES: RestaurantStatus[] = ["pending", "visited"];
+const VALID_RATINGS = [0, 1, 2, 3, 4, 5] as const;
 
 function storageErrorResponse() {
   return NextResponse.json(
@@ -46,10 +49,24 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<CreateRestaurantInput>;
     const name = body.name?.trim();
+    const status = body.status ?? "pending";
+    const rating = Number(body.rating ?? (status === "pending" ? 0 : 3));
 
     if (!name) {
       return NextResponse.json(
         { error: "Restaurant name is required." },
+        { status: 400 },
+      );
+    }
+    if (!VALID_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { error: "Status must be either pending or visited." },
+        { status: 400 },
+      );
+    }
+    if (!VALID_RATINGS.includes(rating as (typeof VALID_RATINGS)[number])) {
+      return NextResponse.json(
+        { error: "Rating must be an integer from 0 to 5." },
         { status: 400 },
       );
     }
@@ -58,6 +75,8 @@ export async function POST(request: Request) {
       name,
       source: body.source ?? "manual",
       sourceLabel: body.sourceLabel ?? "Manual",
+      status,
+      rating: rating as (typeof VALID_RATINGS)[number],
       url: body.url?.trim() || undefined,
       address: body.address?.trim() || undefined,
       notes: body.notes?.trim() || undefined,

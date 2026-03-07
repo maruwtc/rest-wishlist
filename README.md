@@ -1,8 +1,31 @@
-This is a Next.js restaurant wishlist app with mobile-first full-screen sections and Redis-backed persistence on Vercel.
+# Maru Restaurant Wishlist
 
-## Storage Setup
+Maru is a private, mobile-first restaurant wishlist built with Next.js.  
+It helps you capture places from share links (Google Maps or OpenRice), organize them in one list, and quickly decide where to eat next with random picks.
 
-Create a Vercel Redis database and expose one of these env var pairs:
+The app is designed for fast personal use:
+- daily PIN gate before entering the app
+- one-screen flow to add, browse, and manage entries
+- Redis-backed persistence for deployment on Vercel
+
+## What It Does
+
+- Adds restaurants from pasted share text or URLs
+- Auto-detects source (`Google Maps`, `OpenRice`, or `Manual`)
+- Attempts to resolve Google Maps short links for better name/address preview
+- Stores notes, status (`pending` / `visited`), and 0-5 star rating
+- Supports updating status/rating and deleting items
+- Shows random recommendations from your saved list
+
+## Tech Stack
+
+- Next.js 16 (App Router) + React 19 + TypeScript
+- Tailwind CSS 4 + shadcn/ui components
+- Upstash Redis (`@upstash/redis`) for data storage
+
+## Data Storage
+
+Create a Vercel Redis database and provide one of these environment variable pairs:
 
 ```bash
 KV_REST_API_URL=...
@@ -16,35 +39,22 @@ UPSTASH_REDIS_REST_URL=...
 UPSTASH_REDIS_REST_TOKEN=...
 ```
 
-The app stores the wishlist array under the Redis key `maru:restaurants`.
+Restaurants are stored as an array under Redis key `maru:restaurants`.
 
-## Getting Started
+## Local Development
 
-First, run the development server:
+Install dependencies and run the dev server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `pnpm dev` - start local development server
+- `pnpm build` - build for production
+- `pnpm start` - run production server
+- `pnpm lint` - run ESLint

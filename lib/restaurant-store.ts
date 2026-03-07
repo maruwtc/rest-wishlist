@@ -3,12 +3,15 @@ import { getRedisClient, isRedisConfigured } from "@/lib/redis";
 const RESTAURANTS_KEY = "maru:restaurants";
 
 export type RestaurantSource = "google-maps" | "openrice" | "manual";
+export type RestaurantStatus = "pending" | "visited";
 
 export type RestaurantItem = {
   id: string;
   name: string;
   source: RestaurantSource;
   sourceLabel: string;
+  status: RestaurantStatus;
+  rating: 0 | 1 | 2 | 3 | 4 | 5;
   url?: string;
   address?: string;
   notes?: string;
@@ -19,20 +22,60 @@ export type CreateRestaurantInput = {
   name: string;
   source: RestaurantSource;
   sourceLabel: string;
+  status: RestaurantStatus;
+  rating: 0 | 1 | 2 | 3 | 4 | 5;
   url?: string;
   address?: string;
   notes?: string;
 };
 
+export type UpdateRestaurantInput = {
+  status?: RestaurantStatus;
+  rating?: 0 | 1 | 2 | 3 | 4 | 5;
+};
+
+function normalizeRestaurantItem(rawItem: unknown): RestaurantItem | null {
+  if (!rawItem || typeof rawItem !== "object") {
+    return null;
+  }
+
+  const item = rawItem as Partial<RestaurantItem>;
+  if (!item.id || !item.name || !item.source || !item.sourceLabel || !item.createdAt) {
+    return null;
+  }
+
+  const normalizedStatus: RestaurantStatus = item.status === "visited" ? "visited" : "pending";
+
+  return {
+    id: item.id,
+    name: item.name,
+    source: item.source,
+    sourceLabel: item.sourceLabel,
+    status: normalizedStatus,
+    rating:
+      typeof item.rating === "number" && item.rating >= 0 && item.rating <= 5
+        ? (item.rating as 0 | 1 | 2 | 3 | 4 | 5)
+        : normalizedStatus === "visited"
+          ? 3
+          : 0,
+    url: item.url,
+    address: item.address,
+    notes: item.notes,
+    createdAt: item.createdAt,
+  };
+}
+
 export async function listRestaurants() {
   const redis = getRedisClient();
-  const items = await redis.get<RestaurantItem[]>(RESTAURANTS_KEY);
+  const items = await redis.get<unknown>(RESTAURANTS_KEY);
 
   if (!Array.isArray(items)) {
     return [] as RestaurantItem[];
   }
 
-  return items;
+  return items
+    .map(normalizeRestaurantItem)
+    .filter((item): item is RestaurantItem => item !== null);
 }
 
 export async function listRestaurantsSafely() {
@@ -66,6 +109,8 @@ export async function createRestaurant(input: CreateRestaurantInput) {
     name: input.name,
     source: input.source,
     sourceLabel: input.sourceLabel,
+    status: input.status,
+    rating: input.rating,
     url: input.url,
     address: input.address,
     notes: input.notes,
@@ -86,4 +131,27 @@ export async function deleteRestaurant(id: string) {
   await redis.set(RESTAURANTS_KEY, nextItems);
 
   return nextItems;
+}
+
+export async function updateRestaurant(id: string, input: UpdateRestaurantInput) {
+  const items = await listRestaurants();
+  const index = items.findIndex((item) => item.id === id);
+
+  if (index === -1) {
+    return null;
+  }
+
+  const current = items[index];
+  const nextItem: RestaurantItem = {
+    ...current,
+    status: input.status ?? current.status,
+    rating: input.rating ?? current.rating,
+  };
+  const nextItems = [...items];
+  nextItems[index] = nextItem;
+
+  const redis = getRedisClient();
+  await redis.set(RESTAURANTS_KEY, nextItems);
+
+  return nextItem;
 }

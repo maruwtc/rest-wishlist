@@ -17,15 +17,20 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import {
   type CreateRestaurantInput,
   type RestaurantItem,
+  type RestaurantStatus,
 } from "@/lib/restaurant-store";
 import { parseSharedText, sourceLabel } from "@/lib/share-link";
 import { formatRelativeDate } from "@/lib/utils";
+import { ArrowLeft, CheckCheck, Star, Store, Trash } from "lucide-react";
+import { Spinner } from "./ui/spinner";
 
 type Draft = {
   shareText: string;
   name: string;
   address: string;
   notes: string;
+  status: RestaurantStatus;
+  rating: "0" | "1" | "2" | "3" | "4" | "5";
 };
 
 const EMPTY_ITEMS: RestaurantItem[] = [];
@@ -35,6 +40,13 @@ const initialDraft: Draft = {
   name: "",
   address: "",
   notes: "",
+  status: "pending",
+  rating: "0",
+};
+
+type DeleteTarget = {
+  id: string;
+  name: string;
 };
 
 function createRestaurantPayload(draft: Draft): CreateRestaurantInput {
@@ -45,6 +57,8 @@ function createRestaurantPayload(draft: Draft): CreateRestaurantInput {
     name: draft.name.trim() || parsed.name || "Untitled restaurant",
     source,
     sourceLabel: sourceLabel(source),
+    status: draft.status,
+    rating: Number(draft.rating) as 0 | 1 | 2 | 3 | 4 | 5,
     url: parsed.url,
     address: draft.address.trim() || parsed.address || undefined,
     notes: draft.notes.trim() || undefined,
@@ -96,77 +110,173 @@ function createRandomSeed() {
 
 function RestaurantRow({
   item,
-  onDelete,
+  onRequestDelete,
   deleting,
+  onOpenPopup,
 }: {
   item: RestaurantItem;
-  onDelete: (id: string) => void;
+  onRequestDelete: (item: Pick<RestaurantItem, "id" | "name">) => void;
   deleting: boolean;
+  onOpenPopup: (id: string) => void;
 }) {
+  const stars = Array.from({ length: 5 }, (_, index) => index < item.rating);
+  const statusLabel = item.status === "visited" ? "Visited" : "Pending";
+
   return (
     <article className="rounded-[26px] border border-slate-300 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:border-white/15 dark:bg-slate-900/70 dark:shadow-[0_12px_40px_rgba(2,6,23,0.28)]">
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 space-y-2">
+        <button
+          type="button"
+          className="min-w-0 flex-1 space-y-2 text-left"
+          onClick={() => onOpenPopup(item.id)}
+          aria-label={`Open details for ${item.name}`}
+        >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold tracking-[-0.02em] text-slate-950 dark:text-white">
               {item.name}
             </h3>
-            <Badge>{item.sourceLabel}</Badge>
+            <div className="flex items-center gap-1">
+              <Badge>{item.sourceLabel}</Badge>
+              <Badge
+                className={
+                  item.status === "visited"
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200"
+                }
+              >
+                {statusLabel}
+              </Badge>
+            </div>
           </div>
-          {item.address ? (
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-              {item.address}
-            </p>
-          ) : null}
-          {item.notes ? (
-            <p className="text-sm leading-6 text-slate-700 dark:text-slate-200/85">
-              {item.notes}
-            </p>
-          ) : null}
-        </div>
+          <div className="flex items-center gap-1.5 mt-4" aria-label={`${item.rating} star rating`}>
+            {stars.map((filled, index) => (
+              <span
+                key={index}
+                className={`text-xl leading-none ${filled ? "text-amber-500" : "text-slate-300 dark:text-slate-600"}`}
+              >
+                <Star fill={filled ? "currentColor" : "none"} />
+              </span>
+            ))}
+          </div>
+        </button>
         <Button
           variant="ghost"
           size="icon"
           className="shrink-0 rounded-full"
           aria-label={`Delete ${item.name}`}
-          onClick={() => onDelete(item.id)}
+          onClick={() => onRequestDelete(item)}
           disabled={deleting}
         >
           {deleting ? (
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5 animate-spin"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <path d="M12 3a9 9 0 1 0 9 9" />
-            </svg>
+            <Spinner />
           ) : (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M9 3h6" />
-              <path d="M4 7h16" />
-              <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-            </svg>
+            <Trash className="h-5 w-5 text-slate-300 hover:text-rose-600 dark:text-slate-600 dark:hover:text-rose-500" />
           )}
         </Button>
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-        <span>{formatRelativeDate(item.createdAt)}</span>
-        {item.url ? (
-          <a
-            className="font-medium text-sky-700 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200"
-            href={item.url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open source link
-          </a>
-        ) : null}
-      </div>
     </article>
+  );
+}
+
+function RestaurantDetailsPopup({
+  item,
+  onClose,
+  onChangeRating,
+  onToggleStatus,
+  savingRating,
+  savingStatus,
+}: {
+  item: RestaurantItem;
+  onClose: () => void;
+  onChangeRating: (id: string, rating: 0 | 1 | 2 | 3 | 4 | 5) => void;
+  onToggleStatus: (id: string, status: RestaurantStatus) => void;
+  savingRating: boolean;
+  savingStatus: boolean;
+}) {
+  const stars = Array.from({ length: 5 }, (_, index) => index < item.rating);
+  const statusLabel = item.status === "visited" ? "Visited" : "Pending";
+
+  return (
+    <div className="absolute inset-0 z-30 rounded-[28px] border border-slate-300 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.16)] dark:border-white/15 dark:bg-slate-900">
+      <div className="flex h-full flex-col gap-8 overflow-hidden">
+        <div className="flex items-center justify-between gap-4">
+          <Button variant="ghost" className="h-12 rounded-full px-3" onClick={onClose}>
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <span className="text-sm text-slate-500 dark:text-slate-400">{formatRelativeDate(item.createdAt)}</span>
+        </div>
+        <div className="space-y-6 overflow-y-auto pr-1">
+          <div className="flex flex-col items-start gap-3">
+            <h3 className="text-3xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-white">
+              {item.name}
+            </h3>
+            <div className="flex flex-wrap items-center gap-2 justify-between w-full">
+              <div className="flex items-center gap-1">
+                <Badge className="px-3.5 py-1.5 text-sm">{item.sourceLabel}</Badge>
+                <Badge
+                  className={`px-3.5 py-1.5 text-sm ${item.status === "visited"
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200"
+                    }`}
+                >
+                  {statusLabel}
+                </Badge>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                className={`h-10 w-10 p-0 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-slate-300 dark:border-white/20 dark:text-slate-300 dark:hover:bg-white/10 dark:disabled:border-white/10 dark:disabled:text-slate-600 ${item.status === "visited" ? "hover:bg-emerald-100 dark:hover:bg-emerald-500/20" : "hover:bg-amber-100 dark:hover:bg-amber-500/20"}`}
+                onClick={() =>
+                  onToggleStatus(item.id, item.status === "visited" ? "pending" : "visited")
+                }
+                disabled={savingStatus}
+              >
+                <CheckCheck
+                  className={`h-5 w-5 ${item.status === "visited"
+                    ? "text-emerald-500"
+                    : "text-slate-300 dark:text-slate-600"
+                    }`}
+                />
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2" aria-label={`${item.rating} star rating`}>
+            {stars.map((filled, index) => (
+              <button
+                key={index}
+                type="button"
+                className={
+                  filled
+                    ? "text-amber-500"
+                    : "text-slate-300 dark:text-slate-600"
+                }
+                onClick={() => onChangeRating(item.id, (index + 1) as 1 | 2 | 3 | 4 | 5)}
+                disabled={savingRating}
+                aria-label={`Set ${index + 1} star`}
+              >
+                <Star className="h-9 w-9" fill={filled ? "currentColor" : "none"} />
+              </button>
+            ))}
+          </div>
+          {item.address ? (
+            <p className="text-lg leading-8 text-slate-700 dark:text-slate-200">{item.address}</p>
+          ) : null}
+          {item.notes ? (
+            <p className="text-lg leading-8 text-slate-700 dark:text-slate-200/85">{item.notes}</p>
+          ) : null}
+          {item.url ? (
+            <a
+              className="inline-flex rounded-full border border-slate-300 px-5 py-3 text-base font-medium text-sky-700 hover:text-sky-800 dark:border-white/20 dark:text-sky-300 dark:hover:text-sky-200"
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open source link
+            </a>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -182,6 +292,10 @@ export function RestaurantWishlist({
   const [error, setError] = useState<string | null>(initialError);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [openItemId, setOpenItemId] = useState<string | null>(null);
+  const [savingRatingId, setSavingRatingId] = useState<string | null>(null);
+  const [savingStatusId, setSavingStatusId] = useState<string | null>(null);
   const [shuffleSeed, setShuffleSeed] = useState(createRandomSeed);
 
   const parsedPreview = useMemo(
@@ -194,6 +308,10 @@ export function RestaurantWishlist({
   const randomPicks = useMemo(
     () => getRandomPicks(items, shuffleSeed, Math.min(3, items.length)),
     [items, shuffleSeed],
+  );
+  const openItem = useMemo(
+    () => items.find((item) => item.id === openItemId) ?? null,
+    [items, openItemId],
   );
 
   function updateDraft<Key extends keyof Draft>(key: Key, value: Draft[Key]) {
@@ -214,19 +332,15 @@ export function RestaurantWishlist({
         const parsed = parseSharedText(draft.shareText);
 
         if (parsed.url && (!draft.name.trim() || !draft.address.trim())) {
-          try {
-            const preview = await resolveSharePreview(draft.shareText);
+          const preview = await resolveSharePreview(draft.shareText);
 
-            nextDraft = {
-              ...draft,
-              name: draft.name.trim() || preview.name || draft.name,
-              address: draft.address.trim() || preview.address || draft.address,
-            };
+          nextDraft = {
+            ...draft,
+            name: draft.name.trim() || preview.name || draft.name,
+            address: draft.address.trim() || preview.address || draft.address,
+          };
 
-            setDraft(nextDraft);
-          } catch {
-            // Fall back to local parsing when the short-link lookup fails.
-          }
+          setDraft(nextDraft);
         }
 
         const payload = createRestaurantPayload(nextDraft);
@@ -249,6 +363,7 @@ export function RestaurantWishlist({
         }
 
         setItems((current) => [data.item!, ...current]);
+        setOpenItemId(data.item!.id);
         setShuffleSeed(createRandomSeed());
         setDraft(initialDraft);
       } catch (submitError) {
@@ -282,6 +397,7 @@ export function RestaurantWishlist({
         }
 
         setItems(data.items);
+        setOpenItemId((current) => (current === id ? null : current));
         setShuffleSeed(createRandomSeed());
       } catch (deleteError) {
         setError(
@@ -295,12 +411,109 @@ export function RestaurantWishlist({
     })();
   }
 
+  function requestDelete(item: Pick<RestaurantItem, "id" | "name">) {
+    setDeleteTarget({ id: item.id, name: item.name });
+  }
+
+  function confirmDelete() {
+    if (!deleteTarget) {
+      return;
+    }
+    const { id } = deleteTarget;
+    setDeleteTarget(null);
+    handleDelete(id);
+  }
+
+  function openDetails(id: string) {
+    setOpenItemId(id);
+  }
+
+  function handleStatusChange(status: RestaurantStatus) {
+    setDraft((current) => {
+      if (status === "pending") {
+        return { ...current, status, rating: "0" };
+      }
+      if (current.rating === "0") {
+        return { ...current, status, rating: "3" };
+      }
+      return { ...current, status };
+    });
+  }
+
+  function handleUpdateRating(id: string, rating: 0 | 1 | 2 | 3 | 4 | 5) {
+    void (async () => {
+      try {
+        setError(null);
+        setSavingRatingId(id);
+
+        const response = await fetch(`/api/restaurants/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rating }),
+        });
+        const data = (await response.json()) as {
+          item?: RestaurantItem;
+          error?: string;
+        };
+
+        if (!response.ok || !data.item) {
+          throw new Error(data.error ?? "Failed to update rating.");
+        }
+
+        setItems((current) =>
+          current.map((item) => (item.id === id ? { ...item, rating: data.item!.rating } : item)),
+        );
+      } catch (updateError) {
+        setError(
+          updateError instanceof Error ? updateError.message : "Failed to update rating.",
+        );
+      } finally {
+        setSavingRatingId(null);
+      }
+    })();
+  }
+
+  function handleToggleStatus(id: string, status: RestaurantStatus) {
+    void (async () => {
+      try {
+        setError(null);
+        setSavingStatusId(id);
+
+        const response = await fetch(`/api/restaurants/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        });
+        const data = (await response.json()) as {
+          item?: RestaurantItem;
+          error?: string;
+        };
+
+        if (!response.ok || !data.item) {
+          throw new Error(data.error ?? "Failed to update status.");
+        }
+
+        setItems((current) => current.map((item) => (item.id === id ? data.item! : item)));
+      } catch (updateError) {
+        setError(
+          updateError instanceof Error ? updateError.message : "Failed to update status.",
+        );
+      } finally {
+        setSavingStatusId(null);
+      }
+    })();
+  }
+
   return (
     <main className="h-[100svh] overflow-hidden">
-      <div className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth">
+      <div className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-none scroll-smooth touch-pan-y">
         <section className="h-[100svh] snap-start snap-always overflow-hidden">
           <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-            <div className="relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
+            <div className="mobile-scroll-fix relative safe-screen w-full overflow-y-auto rounded-[36px] border border-slate-300/90 bg-white/60 px-5 py-6 overscroll-contain backdrop-blur sm:px-8 sm:py-8 lg:px-10 lg:py-10 dark:border-white/15 dark:bg-slate-950/45">
               <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block" />
               <div className="relative grid min-h-full content-between gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] flex-col items-center justify-between lg:items-start">
                 <div className="flex flex-col items-center gap-10 justify-between lg:items-start">
@@ -312,39 +525,44 @@ export function RestaurantWishlist({
 
                   <div className="flex flex-col flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-300">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span>Click or scroll</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
                       <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#add">
                         Add a restaurant
                       </a>
-                      <a className="rounded-full border border-slate-300 bg-slate-100/90 px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/6 dark:text-white" href="#list">
+                      <a className="rounded-full border border-slate-300 bg-white px-4 py-2 font-medium text-slate-950 dark:border-white/15 dark:bg-white/8 dark:text-white" href="#list">
                         View saved list
                       </a>
                     </div>
                   </div>
 
-                  <div className="">
-                    {randomPicks.length === 0 ? (
-                      <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
-                        Save a few restaurants first, then this section will surface random picks.
-                      </div>
-                    ) : (
-                      <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
-                        {randomPicks.map((item, index) => (
-                          <div
-                            key={item.id}
-                            className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
-                            style={{
-                              animationDelay: `${index * 0.45}s`,
-                            }}
-                          >
-                            {item.name}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+
+                  {error ? (
+                    <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
+                      {error.includes("Redis is not configured")
+                        ? "Please check with administrator. Hint: Database connection"
+                        : "An error occurred. Please check with administrator."}
+                    </div>
+                  ) :
+                    <div className="">
+                      {randomPicks.length === 0 ? (
+                        <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
+                          Save a few restaurants first, then this section will surface random picks.
+                        </div>
+                      ) : (
+                        <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
+                          {randomPicks.map((item, index) => (
+                            <div
+                              key={item.id}
+                              className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
+                              style={{
+                                animationDelay: `${index * 0.45}s`,
+                              }}
+                            >
+                              {item.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>}
                 </div>
                 <div className="flex items-center justify-center">
                   <ThemeToggle />
@@ -363,13 +581,8 @@ export function RestaurantWishlist({
                   Paste share text from OpenRice or Google Maps.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
+              <CardContent className="mobile-scroll-fix min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
                 <form className="space-y-4" onSubmit={handleSubmit}>
-                  {error ? (
-                    <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
-                      {error}
-                    </div>
-                  ) : null}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-950 dark:text-white" htmlFor="share-text">
                       Share text or link
@@ -437,26 +650,22 @@ export function RestaurantWishlist({
 
         <section id="list" className="h-[100svh] snap-start snap-always overflow-hidden">
           <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
-            <Card className="safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
+            <Card className="relative safe-screen flex min-h-0 w-full flex-col overflow-hidden bg-white/60 backdrop-blur dark:bg-slate-950/45">
               <CardHeader className="border-b border-slate-300 pb-5 dark:border-white/15">
                 <CardTitle>Saved restaurants</CardTitle>
               </CardHeader>
-              <CardContent className="min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
+              <CardContent className="mobile-scroll-fix relative min-h-0 flex-1 overflow-y-auto pt-6 overscroll-contain">
                 {items.length === 0 ? (
-                  <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-slate-300 bg-slate-100/70 p-8 text-center dark:border-white/15 dark:bg-white/6">
+                  <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-[26px] border border-dashed border-slate-300 p-8 text-center">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-sky-700 dark:bg-white/10 dark:text-sky-300">
-                      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <path d="M4 8h16" />
-                        <path d="M6 4h12l2 4H4l2-4Z" />
-                        <path d="M5 10h14v7a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-7Z" />
-                      </svg>
+                      <Store className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-lg font-semibold tracking-[-0.03em] text-slate-950 dark:text-white">
                         No saved spots yet
                       </h3>
                       <p className="mx-auto max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Start by pasting a Google Maps or OpenRice share link. New entries will persist in Redis.
+                        Start by pasting a Google Maps or OpenRice share link.
                       </p>
                     </div>
                   </div>
@@ -466,17 +675,60 @@ export function RestaurantWishlist({
                       <RestaurantRow
                         key={item.id}
                         item={item}
-                        onDelete={handleDelete}
+                        onRequestDelete={requestDelete}
                         deleting={deletingId === item.id}
+                        onOpenPopup={openDetails}
                       />
                     ))}
                   </div>
                 )}
               </CardContent>
+              {openItem ? (
+                <RestaurantDetailsPopup
+                  item={openItem}
+                  onClose={() => setOpenItemId(null)}
+                  onChangeRating={handleUpdateRating}
+                  onToggleStatus={handleToggleStatus}
+                  savingRating={savingRatingId === openItem.id}
+                  savingStatus={savingStatusId === openItem.id}
+                />
+              ) : null}
             </Card>
           </div>
         </section>
       </div>
+      {deleteTarget ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm deletion"
+        >
+          <div className="w-full max-w-sm rounded-2xl border border-slate-300 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.24)] dark:border-white/15 dark:bg-slate-900">
+            <h3 className="text-base font-semibold text-slate-950 dark:text-white">Delete restaurant?</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              This will remove <span className="font-medium text-slate-900 dark:text-white">{deleteTarget.name}</span> from
+              your saved list.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deletingId === deleteTarget.id}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500"
+                onClick={confirmDelete}
+                disabled={deletingId === deleteTarget.id}
+              >
+                {deletingId === deleteTarget.id ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
