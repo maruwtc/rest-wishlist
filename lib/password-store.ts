@@ -1,6 +1,20 @@
 import { getRedisClient, isRedisConfigured } from "@/lib/redis";
 
-const PASSWORDS_KEY = "maru:passwords";
+const USERS_KEY = "maru:users";
+
+export type LoginUser = {
+    id: string;
+    name: string;
+    passwordHash: string;
+    lastLogin: string | null;
+    createdAt: string;
+};
+
+export type AuthenticatedUser = {
+    id: string;
+    name: string;
+    lastLogin: string | null;
+};
 
 function normalizePin(pin: string) {
     return pin.replace(/\D/g, "").slice(0, 8);
@@ -33,32 +47,86 @@ async function hashString(value: string) {
     return nodeCrypto.createHash("sha256").update(value).digest("hex");
 }
 
-async function loadStoredHashes() {
+function isStoredUsers(value: unknown): value is LoginUser[] {
+    return (
+        Array.isArray(value) &&
+        value.every(
+            (item) =>
+                typeof item === "object" &&
+                item !== null &&
+                typeof (item as any).id === "string" &&
+                typeof (item as any).name === "string" &&
+                typeof (item as any).passwordHash === "string" &&
+                typeof (item as any).createdAt === "string" &&
+                (typeof (item as any).lastLogin === "string" || (item as any).lastLogin === null),
+        )
+    );
+}
+
+async function loadUsersFromRedis() {
     if (!isRedisConfigured()) {
-        return [];
+        return [] as LoginUser[];
     }
 
     const redis = getRedisClient();
-    const stored = await redis.get<unknown>(PASSWORDS_KEY);
+    const stored = await redis.get<unknown>(USERS_KEY);
 
-    if (Array.isArray(stored) && stored.every((item) => typeof item === "string" && item.length === 64)) {
-        return stored as string[];
+    if (isStoredUsers(stored)) {
+        return stored;
     }
 
     return [];
 }
 
-export async function isValidLoginPin(pin: string) {
+async function ensureUserRecords() {
+    return await loadUsersFromRedis();
+}
+
+export async function findUserByPin(pin: string) {
     const normalizedPin = normalizePin(pin);
 
     if (normalizedPin.length !== 8) {
-        return false;
+        return null;
     }
 
     const hashedPin = await hashString(normalizedPin);
-    const allowedHashes = await loadStoredHashes();
+    const users = await ensureUserRecords();
 
-    return allowedHashes.some((allowedHash) =>
-        timingSafeCompare(allowedHash, hashedPin),
-    );
+    return users.find((user) => timingSafeCompare(user.passwordHash, hashedPin)) ?? null;
+}
+
+export async function updateUserLastLogin(userId: string) {
+    const users = await ensureUserRecords();
+    const index = users.findIndex((user) => user.id === userId);
+
+    if (index === -1) {
+        return null;
+    }
+
+    const updatedUser: LoginUser = {
+        ...users[index],
+        lastLogin: new Date().toISOString(),
+    };
+    const nextUsers = [...users];
+    nextUsers[index] = updatedUser;
+
+    if (isRedisConfigured()) {
+        const redis = getRedisClient();
+        await redis.set(USERS_KEY, nextUsers);
+    }
+
+    return updatedUser;
+}
+
+export function toAuthenticatedUser(user: LoginUser): AuthenticatedUser {
+    return {
+        id: user.id,
+        name: user.name,
+        lastLogin: user.lastLogin,
+    };
+}
+
+export async function isValidLoginPin(pin: string) {
+    const user = await findUserByPin(pin);
+    return user !== null;
 }

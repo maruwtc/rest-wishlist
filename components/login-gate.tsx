@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const SESSION_KEY = "maru-login-unlocked";
+const USER_NAME_KEY = "maru-login-user";
 
 export function LoginGate({
   children,
@@ -46,7 +47,13 @@ export function LoginGate({
       return;
     }
 
+    const result = await response.json().catch(() => ({}));
+    const userName = typeof result.user?.name === "string" ? result.user.name : "";
+
     window.sessionStorage.setItem(SESSION_KEY, "unlocked");
+    if (userName) {
+      window.sessionStorage.setItem(USER_NAME_KEY, userName);
+    }
     setError(null);
     setIsUnlocked(true);
   }

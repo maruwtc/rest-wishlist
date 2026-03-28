@@ -25,8 +25,12 @@ The app is designed for fast personal use:
 
 ## Data Storage
 
-This app validates login via stored SHA-256 hashes in Redis under `maru:passwords`.
-If no environment credential is provided, the login logic still works from hashes already present in Redis.
+This app validates login via stored SHA-256 hashes in Redis under `maru:users`.
+The `maru:users` dataset contains one record per user with `name`, `passwordHash`, and `lastLogin`.
+
+The app does not populate users automatically. You must create `maru:users` in Redis with the allowed PIN hashes before login will work.
+
+If the Redis user list is empty, no PINs will validate.
 
 ## Local Development
 
