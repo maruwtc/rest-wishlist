@@ -23,6 +23,11 @@ The app is designed for fast personal use:
 - Tailwind CSS 4 + shadcn/ui components
 - Upstash Redis (`@upstash/redis`) for data storage
 
+## Data Storage
+
+This app validates login via stored SHA-256 hashes in Redis under `maru:passwords`.
+If no environment credential is provided, the login logic still works from hashes already present in Redis.
+
 ## Local Development
 
 Install dependencies and run the dev server:
