@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createSessionCookieHeader } from "@/lib/auth";
 import { findUserByPin, toAuthenticatedUser, updateUserLastLogin } from "@/lib/password-store";
 
 export async function POST(request: Request) {
@@ -13,6 +14,10 @@ export async function POST(request: Request) {
 
     const updatedUser = await updateUserLastLogin(user.id);
     const responseUser = toAuthenticatedUser(updatedUser ?? user);
+    const setCookie = createSessionCookieHeader(user.id);
 
-    return NextResponse.json({ success: true, user: responseUser });
+    return NextResponse.json(
+        { success: true, user: responseUser },
+        { status: 200, headers: { "Set-Cookie": setCookie } },
+    );
 }

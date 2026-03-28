@@ -6,6 +6,7 @@ import {
   type CreateRestaurantInput,
   type RestaurantStatus,
 } from "@/lib/restaurant-store";
+import { isRequestAuthenticated } from "@/lib/auth";
 import { isRedisConfigured } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,11 @@ function storageErrorResponse() {
   );
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isRequestAuthenticated(request)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   if (!isRedisConfigured()) {
     return storageErrorResponse();
   }
@@ -42,6 +47,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!isRequestAuthenticated(request)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   if (!isRedisConfigured()) {
     return storageErrorResponse();
   }

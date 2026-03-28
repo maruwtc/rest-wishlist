@@ -56,6 +56,7 @@ export function LoginGate({
     }
     setError(null);
     setIsUnlocked(true);
+    window.location.reload();
   }
 
   if (isUnlocked) {

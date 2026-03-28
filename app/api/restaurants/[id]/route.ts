@@ -5,6 +5,7 @@ import {
   updateRestaurant,
   type RestaurantStatus,
 } from "@/lib/restaurant-store";
+import { isRequestAuthenticated } from "@/lib/auth";
 import { isRedisConfigured } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +13,13 @@ const VALID_RATINGS = [0, 1, 2, 3, 4, 5] as const;
 const VALID_STATUSES: RestaurantStatus[] = ["pending", "visited"];
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  if (!isRequestAuthenticated(request)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   if (!isRedisConfigured()) {
     return NextResponse.json(
       {
@@ -49,6 +54,10 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  if (!isRequestAuthenticated(request)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   if (!isRedisConfigured()) {
     return NextResponse.json(
       {

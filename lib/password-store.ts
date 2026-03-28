@@ -1,4 +1,5 @@
 import { getRedisClient, isRedisConfigured } from "@/lib/redis";
+import { getAuthSecret } from "@/lib/auth";
 
 const USERS_KEY = "maru:users";
 
@@ -47,6 +48,26 @@ async function hashString(value: string) {
     return nodeCrypto.createHash("sha256").update(value).digest("hex");
 }
 
+async function hashPin(value: string) {
+    const secret = getAuthSecret();
+    const nodeCrypto = await import("crypto");
+    const derived = nodeCrypto.scryptSync(value, secret, 64).toString("hex");
+    return `scrypt:${derived}`;
+}
+
+async function isPinMatch(storedHash: string, pin: string) {
+    if (storedHash.startsWith("scrypt:")) {
+        return timingSafeCompare(storedHash, await hashPin(pin));
+    }
+
+    const hashedPin = await hashString(pin);
+    if (storedHash.startsWith("sha256:")) {
+        return timingSafeCompare(storedHash, `sha256:${hashedPin}`);
+    }
+
+    return timingSafeCompare(storedHash, hashedPin);
+}
+
 function isStoredUsers(value: unknown): value is LoginUser[] {
     return (
         Array.isArray(value) &&
@@ -89,10 +110,15 @@ export async function findUserByPin(pin: string) {
         return null;
     }
 
-    const hashedPin = await hashString(normalizedPin);
     const users = await ensureUserRecords();
 
-    return users.find((user) => timingSafeCompare(user.passwordHash, hashedPin)) ?? null;
+    for (const user of users) {
+        if (await isPinMatch(user.passwordHash, normalizedPin)) {
+            return user;
+        }
+    }
+
+    return null;
 }
 
 export async function updateUserLastLogin(userId: string) {

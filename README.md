@@ -25,8 +25,10 @@ The app is designed for fast personal use:
 
 ## Data Storage
 
-This app validates login via stored SHA-256 hashes in Redis under `maru:users`.
+This app validates login via stored PIN hashes in Redis under `maru:users`.
 The `maru:users` dataset contains one record per user with `name`, `passwordHash`, and `lastLogin`.
+
+The app now supports stronger `scrypt`-based PIN hashing when an `AUTH_SECRET`, `AUTH_SESSION_SECRET`, or `NEXTAUTH_SECRET` environment variable is provided. Existing raw SHA-256 hashes continue to work for backwards compatibility.
 
 The app does not populate users automatically. You must create `maru:users` in Redis with the allowed PIN hashes before login will work.
 
