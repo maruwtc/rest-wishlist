@@ -20,6 +20,19 @@ export function LoginGate({
   const [error, setError] = useState<string | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(initialAuthenticated);
 
+  useEffect(() => {
+    if (!initialAuthenticated) {
+      fetch("/api/auth/session", { credentials: "include" })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data?.authenticated) {
+            setIsUnlocked(true);
+          }
+        })
+        .catch(() => null);
+    }
+  }, [initialAuthenticated]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -32,6 +45,7 @@ export function LoginGate({
 
     const response = await fetch("/api/auth/verify", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pin: sanitizedPin }),
     });
@@ -46,7 +60,7 @@ export function LoginGate({
     const result = await response.json().catch(() => ({}));
     const userName = typeof result.user?.name === "string" ? result.user.name : "";
 
-    const sessionResponse = await fetch("/api/auth/session");
+    const sessionResponse = await fetch("/api/auth/session", { credentials: "include" });
     const sessionData = await sessionResponse.json().catch(() => null);
 
     if (sessionData?.authenticated) {

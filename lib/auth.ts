@@ -73,7 +73,7 @@ export function createSessionCookieHeader(userId: string) {
         "Path=/",
         `Max-Age=${AUTH_COOKIE_MAX_AGE}`,
         "HttpOnly",
-        "SameSite=Lax",
+        "SameSite=Strict",
     ];
 
     if (isProduction) {
@@ -130,4 +130,21 @@ export function isRequestAuthenticated(request: Request) {
 
 export function getSessionFromCookies(cookies: { get(name: string): { value: string } | undefined }) {
     return getSessionFromCookie(cookies.get(AUTH_COOKIE_NAME)?.value);
+}
+
+export function createClearSessionCookieHeader() {
+    const attributes = [
+        `${AUTH_COOKIE_NAME}=deleted`,
+        "Path=/",
+        "Max-Age=0",
+        "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+        "HttpOnly",
+        "SameSite=Strict",
+    ];
+
+    if (isProduction) {
+        attributes.push("Secure");
+    }
+
+    return attributes.join("; ");
 }
