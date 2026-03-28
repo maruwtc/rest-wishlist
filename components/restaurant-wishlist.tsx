@@ -291,6 +291,7 @@ export function RestaurantWishlist({
   const [draft, setDraft] = useState<Draft>(initialDraft);
   const [items, setItems] = useState<RestaurantItem[]>(initialItems);
   const [error, setError] = useState<string | null>(initialError);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
@@ -357,6 +358,15 @@ export function RestaurantWishlist({
     return () => observer.disconnect();
   }, [maxPickCount]);
 
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setSuccessMessage(null), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [successMessage]);
+
   function updateDraft<Key extends keyof Draft>(key: Key, value: Draft[Key]) {
     setDraft((current) => ({
       ...current,
@@ -409,6 +419,13 @@ export function RestaurantWishlist({
         setOpenItemId(data.item!.id);
         setShuffleSeed(createRandomSeed());
         setDraft(initialDraft);
+        setSuccessMessage(`Added ${data.item!.name} to your wishlist.`);
+        setError(null);
+
+        document.getElementById("list")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       } catch (submitError) {
         setError(
           submitError instanceof Error
@@ -586,28 +603,36 @@ export function RestaurantWishlist({
                       ? "Please check with administrator. Hint: Database connection"
                       : "An error occurred. Please check with administrator."}
                   </div>
-                ) :
-                  <div className="">
-                    {randomPicks.length === 0 ? (
-                      <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
-                        Save a few restaurants first, then this section will surface random picks.
-                      </div>
-                    ) : (
-                      <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
-                        {randomPicks.map((item, index) => (
-                          <div
-                            key={item.id}
-                            className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
-                            style={{
-                              animationDelay: `${index * 0.45}s`,
-                            }}
-                          >
-                            {item.name}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>}
+                ) : null}
+                {successMessage ? (
+                  <div className="rounded-[22px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-100">
+                    <div className="flex items-center gap-2">
+                      <CheckCheck className="h-4 w-4" />
+                      <span>{successMessage}</span>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="">
+                  {randomPicks.length === 0 ? (
+                    <div className="rounded-[22px] border border-slate-300 bg-slate-100/80 p-4 text-sm text-slate-600 dark:border-white/15 dark:bg-white/6 dark:text-slate-300">
+                      Save a few restaurants first, then this section will surface random picks.
+                    </div>
+                  ) : (
+                    <div className="flex min-h-56 flex-wrap content-center items-center gap-3 py-3">
+                      {randomPicks.map((item, index) => (
+                        <div
+                          key={item.id}
+                          className="float-chip rounded-full border border-slate-300 bg-white px-5 py-3 text-base font-semibold text-slate-950 shadow-[0_16px_32px_rgba(26,115,232,0.12)] dark:border-white/15 dark:bg-slate-900/80 dark:text-white dark:shadow-[0_16px_32px_rgba(2,132,199,0.14)]"
+                          style={{
+                            animationDelay: `${index * 0.45}s`,
+                          }}
+                        >
+                          {item.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-center">
                 <ThemeToggle />
