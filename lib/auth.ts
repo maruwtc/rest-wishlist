@@ -3,29 +3,14 @@ import crypto from "crypto";
 export const AUTH_COOKIE_NAME = "maru-session";
 const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const COOKIE_SIGNATURE_ALGO = "sha256";
-const isProduction = process.env.NODE_ENV === "production";
-
-const ENV_AUTH_SECRET =
+const COOKIE_SECRET =
     process.env.AUTH_SECRET ??
     process.env.AUTH_SESSION_SECRET ??
     process.env.NEXTAUTH_SECRET ??
-    process.env.PIN_HASH_SECRET;
+    process.env.PIN_HASH_SECRET ??
+    "maru-local-dev-secret";
 
-const AUTH_INSECURE_DEV_SECRET = "maru-local-dev-secret";
-
-const COOKIE_SECRET = (() => {
-    if (ENV_AUTH_SECRET) {
-        return ENV_AUTH_SECRET;
-    }
-
-    if (isProduction) {
-        throw new Error(
-            "Missing auth secret in production. Set AUTH_SECRET, AUTH_SESSION_SECRET, NEXTAUTH_SECRET or PIN_HASH_SECRET.",
-        );
-    }
-
-    return AUTH_INSECURE_DEV_SECRET;
-})();
+const isProduction = process.env.NODE_ENV === "production";
 
 type AuthSession = {
     userId: string;
@@ -37,7 +22,12 @@ function timingSafeCompare(a: string, b: string) {
         return false;
     }
 
-    return crypto.timingSafeEqual(Buffer.from(a, "utf8"), Buffer.from(b, "utf8"));
+    let diff = 0;
+    for (let i = 0; i < a.length; i += 1) {
+        diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+
+    return diff === 0;
 }
 
 function signValue(value: string) {

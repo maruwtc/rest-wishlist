@@ -6,13 +6,8 @@ import { findUserByPin, toAuthenticatedUser, updateUserLastLogin } from "@/lib/p
 const AUTH_ATTEMPT_WINDOW_SECONDS = 60 * 5;
 const AUTH_MAX_ATTEMPTS = 5;
 const AUTH_LOCK_SECONDS = 60 * 15;
-const TRUST_PROXY_IP = process.env.TRUST_PROXY_IP === "1";
 
 function getRequestIp(request: Request) {
-    if (!TRUST_PROXY_IP) {
-        return "unknown";
-    }
-
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) {
         return forwarded.split(",")[0].trim();
@@ -56,7 +51,7 @@ export async function POST(request: Request) {
 
     if (!user) {
         const attempts = await incrementAuthAttempts(redis, attemptsKey);
-        if (attempts >= AUTH_MAX_ATTEMPTS) {
+        if (attempts > AUTH_MAX_ATTEMPTS) {
             await redis.set(lockKey, "1");
             await redis.expire(lockKey, AUTH_LOCK_SECONDS);
             return NextResponse.json(
