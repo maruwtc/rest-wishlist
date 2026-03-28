@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SonnerToaster } from "@/components/sonner-toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default function RootLayout({
       </head>
       <body className="text-slate-950 dark:text-slate-500 bg-[#f8fbff] dark:bg-[#020617]">
         {children}
+        <SonnerToaster />
         <Analytics />
       </body>
     </html>

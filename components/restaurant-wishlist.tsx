@@ -23,6 +23,7 @@ import { parseSharedText, sourceLabel } from "@/lib/share-link";
 import { formatRelativeDate } from "@/lib/utils";
 import { ArrowLeft, CheckCheck, Star, Store, Trash } from "lucide-react";
 import { Spinner } from "./ui/spinner";
+import { toast } from "sonner";
 
 type Draft = {
   shareText: string;
@@ -420,6 +421,7 @@ export function RestaurantWishlist({
         setShuffleSeed(createRandomSeed());
         setDraft(initialDraft);
         setSuccessMessage(`Added ${data.item!.name} to your wishlist.`);
+        toast.success(`Added ${data.item!.name}.`);
         setError(null);
 
         document.getElementById("list")?.scrollIntoView({
@@ -427,11 +429,9 @@ export function RestaurantWishlist({
           block: "start",
         });
       } catch (submitError) {
-        setError(
-          submitError instanceof Error
-            ? submitError.message
-            : "Failed to save restaurant.",
-        );
+        const message = submitError instanceof Error ? submitError.message : "Failed to save restaurant.";
+        setError(message);
+        toast.error(message);
       } finally {
         setIsAdding(false);
       }
@@ -459,12 +459,11 @@ export function RestaurantWishlist({
         setItems(data.items);
         setOpenItemId((current) => (current === id ? null : current));
         setShuffleSeed(createRandomSeed());
+        toast.success("Restaurant deleted.");
       } catch (deleteError) {
-        setError(
-          deleteError instanceof Error
-            ? deleteError.message
-            : "Failed to delete restaurant.",
-        );
+        const message = deleteError instanceof Error ? deleteError.message : "Failed to delete restaurant.";
+        setError(message);
+        toast.error(message);
       } finally {
         setDeletingId(null);
       }

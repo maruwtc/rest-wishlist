@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
+import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,13 +19,11 @@ export function LoginGate({
 }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isUnlocked, setIsUnlocked] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
-    return window.sessionStorage.getItem(SESSION_KEY) === "unlocked";
-  });
+  useEffect(() => {
+    setIsUnlocked(window.sessionStorage.getItem(SESSION_KEY) === "unlocked");
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,7 +42,9 @@ export function LoginGate({
     });
 
     if (!response.ok) {
-      setError("Incorrect PIN.");
+      const message = "Incorrect PIN.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -56,7 +57,7 @@ export function LoginGate({
     }
     setError(null);
     setIsUnlocked(true);
-    window.location.reload();
+    toast.success(`Welcome${userName ? `, ${userName}` : ""}!`);
   }
 
   if (isUnlocked) {
