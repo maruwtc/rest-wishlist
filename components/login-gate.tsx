@@ -9,21 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-const SESSION_KEY = "maru-login-unlocked";
-const USER_NAME_KEY = "maru-login-user";
-
 export function LoginGate({
   children,
+  initialAuthenticated,
 }: {
   children: React.ReactNode;
+  initialAuthenticated: boolean;
 }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-
-  useEffect(() => {
-    setIsUnlocked(window.sessionStorage.getItem(SESSION_KEY) === "unlocked");
-  }, []);
+  const [isUnlocked, setIsUnlocked] = useState(initialAuthenticated);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,13 +46,18 @@ export function LoginGate({
     const result = await response.json().catch(() => ({}));
     const userName = typeof result.user?.name === "string" ? result.user.name : "";
 
-    window.sessionStorage.setItem(SESSION_KEY, "unlocked");
-    if (userName) {
-      window.sessionStorage.setItem(USER_NAME_KEY, userName);
+    const sessionResponse = await fetch("/api/auth/session");
+    const sessionData = await sessionResponse.json().catch(() => null);
+
+    if (sessionData?.authenticated) {
+      setIsUnlocked(true);
+      setError(null);
+      toast.success(`Welcome${userName ? `, ${userName}` : ""}!`);
+      return;
     }
-    setError(null);
-    setIsUnlocked(true);
-    toast.success(`Welcome${userName ? `, ${userName}` : ""}!`);
+
+    setError("Failed to confirm authentication.");
+    toast.error("Failed to confirm authentication.");
   }
 
   if (isUnlocked) {

@@ -14,7 +14,7 @@ export default async function Home() {
     : { items: [], storageError: null };
 
   return (
-    <LoginGate>
+    <LoginGate initialAuthenticated={Boolean(session)}>
       <RestaurantWishlist initialItems={items} initialError={storageError} />
     </LoginGate>
   );
