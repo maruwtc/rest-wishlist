@@ -60,13 +60,16 @@ export function LoginGate({
       <div className="safe-page mx-auto flex h-full w-full max-w-7xl items-stretch px-4 py-0 sm:px-6 lg:px-8">
         <div className="relative flex safe-screen w-full items-center justify-center overflow-hidden">
           <ThemeToggle className="absolute right-0 top-0 z-10 sm:right-2 sm:top-2" />
-          <Card className="w-full max-w-md flex-col items-center space-y-4 bg-white/72 backdrop-blur dark:bg-slate-950/60">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl tracking-[-0.04em]">Enter 8-digit PIN</CardTitle>
+          <Card className="w-full max-w-md overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-2xl shadow-slate-900/10 backdrop-blur dark:border-slate-700/80 dark:bg-slate-950/80 dark:shadow-none">
+            <CardHeader className="text-center px-8 pt-10">
+              <CardTitle className="text-3xl tracking-[-0.04em]">Login</CardTitle>
+              <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Enter your 8-digit PIN to unlock.
+              </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-8 pb-10">
               <form className="w-full" onSubmit={handleSubmit}>
-                <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col items-center space-y-4">
                   <InputOTP
                     id="login-pin"
                     maxLength={8}
@@ -94,7 +97,7 @@ export function LoginGate({
                       {error}
                     </div>
                   ) : null}
-                  <Button type="submit" className="justify-center mt-6 w-full" disabled={pin.length !== 8}>
+                  <Button type="submit" className="justify-center mt-2 w-full" disabled={pin.length !== 8}>
                     Unlock
                   </Button>
                 </div>
