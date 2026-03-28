@@ -8,23 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-const SESSION_KEY = "maru-login-day";
-
-function getTodayPinParts(date = new Date()) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
-
-  return {
-    key: `${date.getFullYear()}-${month}-${day}`,
-    pin: `${day}${month}${year}`,
-    label: date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
-  };
-}
+const SESSION_KEY = "maru-login-unlocked";
 
 export function LoginGate({
   children,
@@ -38,21 +22,31 @@ export function LoginGate({
       return false;
     }
 
-    return window.sessionStorage.getItem(SESSION_KEY) === getTodayPinParts().key;
+    return window.sessionStorage.getItem(SESSION_KEY) === "unlocked";
   });
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const sanitizedPin = pin.replace(/\D/g, "").slice(0, 6);
-    const { key, pin: expectedPin } = getTodayPinParts();
+    const sanitizedPin = pin.replace(/\D/g, "").slice(0, 8);
 
-    if (sanitizedPin !== expectedPin) {
+    if (sanitizedPin.length !== 8) {
+      setError("PIN must be 8 digits.");
+      return;
+    }
+
+    const response = await fetch("/api/auth/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: sanitizedPin }),
+    });
+
+    if (!response.ok) {
       setError("Incorrect PIN.");
       return;
     }
 
-    window.sessionStorage.setItem(SESSION_KEY, key);
+    window.sessionStorage.setItem(SESSION_KEY, "unlocked");
     setError(null);
     setIsUnlocked(true);
   }
@@ -68,14 +62,14 @@ export function LoginGate({
           <ThemeToggle className="absolute right-0 top-0 z-10 sm:right-2 sm:top-2" />
           <Card className="w-full max-w-md flex-col items-center space-y-4 bg-white/72 backdrop-blur dark:bg-slate-950/60">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl tracking-[-0.04em]">Enter PIN</CardTitle>
+              <CardTitle className="text-3xl tracking-[-0.04em]">Enter 8-digit PIN</CardTitle>
             </CardHeader>
             <CardContent>
               <form className="w-full" onSubmit={handleSubmit}>
                 <div className="flex flex-col items-center space-y-2">
                   <InputOTP
-                    id="daily-pin"
-                    maxLength={6}
+                    id="login-pin"
+                    maxLength={8}
                     pattern={REGEXP_ONLY_DIGITS}
                     autoComplete="one-time-code"
                     value={pin}
@@ -91,6 +85,8 @@ export function LoginGate({
                       <InputOTPSlot index={3} />
                       <InputOTPSlot index={4} />
                       <InputOTPSlot index={5} />
+                      <InputOTPSlot index={6} />
+                      <InputOTPSlot index={7} />
                     </InputOTPGroup>
                   </InputOTP>
                   {error ? (
@@ -98,7 +94,7 @@ export function LoginGate({
                       {error}
                     </div>
                   ) : null}
-                  <Button type="submit" className="justify-center mt-6 w-full" disabled={pin.length !== 6}>
+                  <Button type="submit" className="justify-center mt-6 w-full" disabled={pin.length !== 8}>
                     Unlock
                   </Button>
                 </div>

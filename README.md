@@ -23,24 +23,6 @@ The app is designed for fast personal use:
 - Tailwind CSS 4 + shadcn/ui components
 - Upstash Redis (`@upstash/redis`) for data storage
 
-## Data Storage
-
-Create a Vercel Redis database and provide one of these environment variable pairs:
-
-```bash
-KV_REST_API_URL=...
-KV_REST_API_TOKEN=...
-```
-
-or
-
-```bash
-UPSTASH_REDIS_REST_URL=...
-UPSTASH_REDIS_REST_TOKEN=...
-```
-
-Restaurants are stored as an array under Redis key `maru:restaurants`.
-
 ## Local Development
 
 Install dependencies and run the dev server:
